@@ -59,18 +59,18 @@ const Notification = ({
     <div className={`fixed top-4 right-4 z-[10000] transform transition-all duration-300 ${
       show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
     }`}>
-      <div className={`max-w-sm w-full bg-white border rounded-xl shadow-lg ${getStyles()}`}>
-        <div className="p-4">
+      <div className={`max-w-md w-96 bg-white border rounded-xl shadow-xl ${getStyles()}`}>
+        <div className="p-5">
           <div className="flex items-start">
             <div className="flex-shrink-0">
               {getIcon()}
             </div>
             <div className="ml-3 w-0 flex-1">
-              <p className="text-sm font-medium">{message}</p>
+              <p className="text-sm font-medium leading-relaxed">{message}</p>
             </div>
             <div className="ml-4 flex-shrink-0 flex">
               <button
-                className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150"
+                className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150 p-1 rounded-full hover:bg-gray-100"
                 onClick={handleClose}
               >
                 <X className="h-4 w-4" />

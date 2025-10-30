@@ -1,20 +1,36 @@
 import { MapPin, Briefcase, Clock, CheckCircle, Calendar } from 'lucide-react';
 
 const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
-  // Calculate days since posted
-  const getDaysSincePosted = (postedDate) => {
-    const today = new Date();
+  // Calculate precise time since posted
+  const getTimeSincePosted = (postedDate) => {
+    const now = new Date();
     const posted = new Date(postedDate);
-    const diffTime = Math.abs(today - posted);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = now - posted;
     
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 14) return '1 week ago';
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 60) return '1 month ago';
-    return `${Math.floor(diffDays / 30)} months ago`;
+    // If the date is in the future, return "Just now"
+    if (diffTime < 0) return 'Just now';
+    
+    const diffSeconds = Math.floor(diffTime / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
+    
+    if (diffSeconds < 60) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? '' : 's'} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks === 1 ? '' : 's'} ago`;
+    if (diffMonths < 12) return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`;
+    return `${diffYears} year${diffYears === 1 ? '' : 's'} ago`;
   };
+
+  // Get job category from API data structure
+  const jobCategory = job.jobDescription?.category || 'Other';
+  const jobOverview = job.jobDescription?.summary?.overview || 'No overview available for this position.';
+  const jobStatus = job.status === 'open' ? 'Active' : 'Closed';
 
   return (
     <div 
@@ -37,18 +53,18 @@ const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
               )}
             </div>
             <span className={`text-xs font-medium px-2.5 py-1 rounded flex-shrink-0 ${
-              job.status === 'Active' 
+              jobStatus === 'Active' 
                 ? 'bg-green-100 text-green-700' 
                 : 'bg-gray-100 text-gray-700'
             }`}>
-              {job.status}
+              {jobStatus}
             </span>
           </div>
           
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
             <span className="flex items-center gap-1.5">
               <Briefcase size={14} />
-              {job.department}
+              {jobCategory}
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin size={14} />
@@ -63,7 +79,7 @@ const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
           {/* Job Overview */}
           <div className="mb-2">
             <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-              {job.summary?.overview || 'No overview available for this position.'}
+              {jobOverview}
             </p>
           </div>
 
@@ -71,11 +87,13 @@ const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1.5 text-gray-500">
               <Calendar size={14} />
-              Posted {getDaysSincePosted(job.postedDate)}
+              Posted {getTimeSincePosted(job.postedDate)}
             </span>
-            <span className="text-xs text-gray-400 font-medium">
-              {job.experience}
-            </span>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span className="font-medium">
+                {job.experience}
+              </span>
+            </div>
           </div>
         </div>
       </div>

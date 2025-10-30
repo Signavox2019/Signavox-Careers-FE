@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { apiService } from '../api';
 
 const AuthContext = createContext();
 
@@ -15,55 +16,140 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing token in localStorage
-    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-    const userData = localStorage.getItem('userData') || localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        // Clear invalid data
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+  // Function to validate token - returns structured result without throwing
+  const validateToken = async (token) => {
+    try {
+      const response = await apiService.validateToken(token);
+      if (response?.message === 'Invalid or expired token') {
+        return { valid: false, message: response.message };
       }
+      if (response?.success && response?.user) {
+        return { valid: true, user: response.user };
+      }
+      return { valid: false, message: response?.message || 'Token validation failed' };
+    } catch (error) {
+      console.error('Token validation error:', error);
+      // Do NOT force logout on transient/network errors; let caller decide
+      return { valid: false, message: 'Validation request failed' };
     }
-    
-    setLoading(false);
+  };
+
+  // Function to clear authentication data
+  const clearAuthData = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('appliedJobs');
+
+    // localStorage.removeItem('authToken');
+    // localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        setLoading(true);
+        
+        // Check for existing token in localStorage
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        
+        if (token) {
+          // Validate token with server
+          const result = await validateToken(token);
+          if (result.valid && result.user) {
+            setUser(result.user);
+            setIsAuthenticated(true);
+            try { localStorage.setItem('userData', JSON.stringify(result.user)); } catch {}
+          } else if (result.message === 'Invalid or expired token') {
+            // Only clear on explicit invalid token
+            clearAuthData();
+          } else {
+            // On other errors, keep existing storage; do not force logout
+            console.warn('Token validation could not confirm validity; preserving session temporarily');
+          }
+        } else {
+          // No token found, check for old user data and clear it
+          const userData = localStorage.getItem('userData') || localStorage.getItem('user');
+          if (userData) {
+            clearAuthData();
+          }
+        }
+      } catch (error) {
+        console.error('Authentication initialization error:', error);
+        // Do not clear storage here; only explicit invalid token should clear
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = (userData, token) => {
-    // Store in both formats for compatibility
-    localStorage.setItem('authToken', token);
     localStorage.setItem('token', token);
     localStorage.setItem('userData', JSON.stringify(userData));
-    localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    console.log('Logging out user...');
+    
+    // Clear all authentication-related localStorage items
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
-    localStorage.removeItem('user');
+    // localStorage.removeItem('authToken');
+    // localStorage.removeItem('user');
+    
+    // Clear any other application-specific localStorage items
+    localStorage.removeItem('appliedJobs');
+    
+    console.log('localStorage cleared successfully');
+    
+    // Reset state
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  const value = {
+  // Function to manually validate token (can be called when needed)
+  const checkTokenValidity = async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    
+    if (!token) {
+      clearAuthData();
+      return false;
+    }
+
+    try {
+      const result = await validateToken(token);
+      if (result.valid && result.user) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        try { localStorage.setItem('userData', JSON.stringify(result.user)); } catch {}
+        return true;
+      } else if (result.message === 'Invalid or expired token') {
+        clearAuthData();
+        return false;
+      } else {
+        // For transient errors, keep session
+        return true;
+      }
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      // On unexpected error, keep session and report false to caller
+      return true;
+    }
+  };
+
+  const value = useMemo(() => ({
     user,
     isAuthenticated,
     loading,
     login,
     logout,
-  };
+    checkTokenValidity,
+  }), [user, isAuthenticated, loading]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigation } from '../../contexts/NavigationContext';
 import Sidebar from './Sidebar';
 import UserProfileDropdown from './UserProfileDropdown';
+import NavigationSpinner from './NavigationSpinner';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated, user, logout, login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { startNavigation } = useNavigation();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -31,6 +34,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <NavigationSpinner />
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
@@ -62,13 +66,19 @@ const Layout = ({ children }) => {
                 ) : (
                   <div className="flex items-center gap-3">
                     <button 
-                      onClick={() => navigate('/login')}
+                      onClick={() => {
+                        startNavigation();
+                        navigate('/login');
+                      }}
                       className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       Sign In
                     </button>
                     <button 
-                      onClick={() => navigate('/register')}
+                      onClick={() => {
+                        startNavigation();
+                        navigate('/register');
+                      }}
                       className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-semibold rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       Sign Up

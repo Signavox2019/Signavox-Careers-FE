@@ -1,9 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, LogOut, ChevronDown } from 'lucide-react';
+import { useNavigation } from '../../contexts/NavigationContext';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const UserProfileDropdown = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const { startNavigation } = useNavigation();
+  const { showSuccess } = useNotification();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -19,8 +25,18 @@ const UserProfileDropdown = ({ user, onLogout }) => {
   }, []);
 
   const handleLogout = () => {
+    console.log('User clicked logout button');
+    startNavigation(); // Show spinner briefly
     onLogout();
     setIsOpen(false);
+    // Show a brief toast and then navigate
+    try {
+      showSuccess('Logged out successfully. Redirecting…', 3000);
+    } catch {}
+    setTimeout(() => {
+      navigate('/login', { replace: true });
+      console.log('Navigated to login page');
+    }, 700);
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Eye, 
   EyeOff, 
@@ -22,11 +22,13 @@ import {
   Code
 } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import baseUrl from '../api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { showSuccess, showError } = useNotification();
+  const { startNavigation } = useNavigation();
   const [formData, setFormData] = useState({
     firstName: '',
     middleName: '',
@@ -321,6 +323,7 @@ const RegisterPage = () => {
         setRegisterStatus('success');
         showSuccess('Registration successful! Redirecting to login...');
         // Navigate to login page after successful registration
+        startNavigation(); // Show spinner
         setTimeout(() => {
           navigate('/login');
         }, 2000);
@@ -1037,10 +1040,10 @@ const RegisterPage = () => {
       </div>
 
       {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
+      {/* <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
       <div className="absolute top-40 right-20 w-16 h-16 bg-purple-100 rounded-full opacity-30 animate-bounce"></div>
       <div className="absolute bottom-40 left-20 w-12 h-12 bg-green-100 rounded-full opacity-25 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-24 h-24 bg-orange-100 rounded-full opacity-20 animate-bounce"></div>
+      <div className="absolute bottom-20 right-10 w-24 h-24 bg-orange-100 rounded-full opacity-20 animate-bounce"></div> */}
 
       <div className="relative w-full max-w-4xl">
         {/* Registration Card */}
@@ -1140,9 +1143,9 @@ const RegisterPage = () => {
           <div className="text-center mt-8">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <a href="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
                 Sign in here
-              </a>
+              </Link>
             </p>
           </div>
         </div>

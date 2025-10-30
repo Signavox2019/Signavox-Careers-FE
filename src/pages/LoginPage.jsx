@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Eye, 
   EyeOff, 
@@ -11,16 +11,20 @@ import {
   Github,
   Linkedin,
   Twitter,
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import baseUrl from '../api';
+import loginBG from '../assets/login_bg.png'
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { showSuccess, showError } = useNotification();
+  const { startNavigation } = useNavigation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -91,6 +95,7 @@ const LoginPage = () => {
         showSuccess('Login successful! Redirecting...');
         
         // Redirect to dashboard or home page
+        startNavigation(); // Show spinner
         setTimeout(() => {
           navigate('/');
         }, 1500);
@@ -108,33 +113,56 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Image - Career Growth Theme */}
-      <div className="absolute inset-0 opacity-15">
-        <div 
-          className="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='1200' height='800' viewBox='0 0 1200 800' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='careerGradient' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23059669;stop-opacity:0.08'/%3E%3Cstop offset='30%25' style='stop-color:%230F766E;stop-opacity:0.08'/%3E%3Cstop offset='60%25' style='stop-color:%231E40AF;stop-opacity:0.08'/%3E%3Cstop offset='100%25' style='stop-color:%237C2D12;stop-opacity:0.08'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23careerGradient)'/%3E%3C!-- Career Growth Elements --%3E%3Cg fill='%23059669' fill-opacity='0.12'%3E%3C!-- Ladder/Steps representing career growth --%3E%3Crect x='100' y='600' width='20' height='100' rx='2'/%3E%3Crect x='120' y='580' width='20' height='120' rx='2'/%3E%3Crect x='140' y='560' width='20' height='140' rx='2'/%3E%3Crect x='160' y='540' width='20' height='160' rx='2'/%3E%3Crect x='180' y='520' width='20' height='180' rx='2'/%3E%3C!-- Success indicators --%3E%3Ccircle cx='300' cy='200' r='15'/%3E%3Ccircle cx='350' cy='250' r='20'/%3E%3Ccircle cx='400' cy='300' r='25'/%3E%3Ccircle cx='450' cy='350' r='30'/%3E%3C!-- Growth arrows --%3E%3Cpath d='M600 500 L650 450 L700 500 L650 550 Z' fill='%230F766E' fill-opacity='0.15'/%3E%3Cpath d='M750 400 L800 350 L850 400 L800 450 Z' fill='%230F766E' fill-opacity='0.15'/%3E%3Cpath d='M900 300 L950 250 L1000 300 L950 350 Z' fill='%230F766E' fill-opacity='0.15'/%3E%3C!-- Professional building blocks --%3E%3Crect x='200' y='300' width='60' height='60' rx='8' fill='%231E40AF' fill-opacity='0.1'/%3E%3Crect x='280' y='280' width='60' height='80' rx='8' fill='%231E40AF' fill-opacity='0.1'/%3E%3Crect x='360' y='260' width='60' height='100' rx='8' fill='%231E40AF' fill-opacity='0.1'/%3E%3Crect x='440' y='240' width='60' height='120' rx='8' fill='%231E40AF' fill-opacity='0.1'/%3E%3C!-- Achievement stars --%3E%3Cpath d='M800 100 L810 120 L830 120 L815 135 L820 155 L800 140 L780 155 L785 135 L770 120 L790 120 Z' fill='%237C2D12' fill-opacity='0.12'/%3E%3Cpath d='M900 150 L905 160 L915 160 L908 170 L910 180 L900 170 L890 180 L892 170 L885 160 L895 160 Z' fill='%237C2D12' fill-opacity='0.12'/%3E%3Cpath d='M1000 200 L1005 210 L1015 210 L1008 220 L1010 230 L1000 220 L990 230 L992 220 L985 210 L995 210 Z' fill='%237C2D12' fill-opacity='0.12'/%3E%3C!-- Network connections --%3E%3Cline x1='100' y1='200' x2='200' y2='250' stroke='%23059669' stroke-width='2' stroke-opacity='0.1'/%3E%3Cline x1='200' y1='250' x2='300' y2='200' stroke='%23059669' stroke-width='2' stroke-opacity='0.1'/%3E%3Cline x1='300' y1='200' x2='400' y2='250' stroke='%23059669' stroke-width='2' stroke-opacity='0.1'/%3E%3Cline x1='400' y1='250' x2='500' y2='200' stroke='%23059669' stroke-width='2' stroke-opacity='0.1'/%3E%3C/g%3E%3C/svg%3E")`
-          }}
-        ></div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        // style={{
+        //   backgroundImage: `${loginBG}`,
+        //   backgroundAttachment: 'fixed'
+        // }}
+      >
+        {/* Fullscreen, creative, and professional background */}
+        <img
+          src={loginBG}
+          alt="Login background"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+          style={{ minHeight: '100vh', minWidth: '100vw', filter: 'brightness(0.7) blur(1px)' }}
+        />
+        {/* Creative overlay with branding gradients & effects */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          {/* Dark translucent overlay */}
+          {/* <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-slate-900/60 to-blue-950/70" /> */}
+          {/* Subtle top-left grid dots */}
+          <div
+            className="absolute left-0 top-0 w-full h-full opacity-10"
+            style={{
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.15'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+              backgroundRepeat: "repeat"
+            }}
+          />
+          {/* Decorative floating shapes */}
+          {/* <div className="absolute top-20 left-16 w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-blue-800 opacity-40 blur-2xl animate-pulse"></div>
+          <div className="absolute right-8 bottom-32 w-32 h-32 rounded-full bg-gradient-to-br from-fuchsia-800 to-purple-400 opacity-30 blur-3xl animate-blob"></div>
+          <div className="absolute bottom-10 left-64 w-16 h-16 rounded-full bg-gradient-to-r from-cyan-600 to-sky-400 opacity-25 blur-lg animate-pulse"></div> */}
+          {/* Elegant grid lines */}
+          {/* <div className="absolute inset-0 pointer-events-none z-20">
+            <svg width="100%" height="100%" className="opacity-5" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="lines" width="80" height="80" patternUnits="userSpaceOnUse">
+                  <path d="M80 0 L0 80" stroke="#fff" strokeWidth="1" />
+                  <path d="M0 0 L80 80" stroke="#fff" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#lines)" />
+            </svg>
+          </div> */}
+        </div>
       </div>
-      
-      {/* Overlay Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}></div>
-      </div>
-
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
-      <div className="absolute top-40 right-20 w-16 h-16 bg-purple-100 rounded-full opacity-30 animate-bounce"></div>
-      <div className="absolute bottom-40 left-20 w-12 h-12 bg-green-100 rounded-full opacity-25 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-24 h-24 bg-orange-100 rounded-full opacity-20 animate-bounce"></div>
 
       <div className="relative w-full max-w-md">
         {/* Login Card */}
-        <div className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -216,9 +244,9 @@ const LoginPage = () => {
 
             {/* Forgot Password */}
             <div className="flex items-center justify-end">
-              <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             {/* Login Button */}
@@ -245,9 +273,9 @@ const LoginPage = () => {
           <div className="text-center mt-8">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <a href="/register" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
                 Sign up here
-              </a>
+              </Link>
             </p>
           </div>
         </div>

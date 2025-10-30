@@ -1,13 +1,17 @@
 import { useState, useMemo, useEffect } from 'react';
-import { CheckCircle } from 'lucide-react';
-import { jobListings } from '../data/jobData';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { apiService } from '../api';
 import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
 import JobCard from '../components/job/JobCard';
 import JobDetails from '../components/job/JobDetails';
+import JobApplicationModal from '../components/job/JobApplicationModal';
 
 const JobListPage = () => {
-  const [selectedJob, setSelectedJob] = useState(jobListings[0]);
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -15,11 +19,42 @@ const JobListPage = () => {
   const [activeTab, setActiveTab] = useState('all'); // 'all' or 'applied'
   const [appliedJobIds, setAppliedJobIds] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
+  const [showAuthRequired, setShowAuthRequired] = useState(false);
+  const [authRedirecting, setAuthRedirecting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedJobForApplication, setSelectedJobForApplication] = useState(null);
+  
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  // Get unique filter options
-  const departments = [...new Set(jobListings.map(job => job.department))];
-  const types = [...new Set(jobListings.map(job => job.type))];
-  const locations = [...new Set(jobListings.map(job => job.location))];
+  // Get unique filter options from API data
+  const departments = [...new Set(jobs.map(job => job.jobDescription?.category || 'Other'))];
+  const types = [...new Set(jobs.map(job => job.type))];
+  const locations = [...new Set(jobs.map(job => job.location))];
+
+  // Fetch jobs from API
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiService.getJobs();
+        setJobs(response.jobs || []);
+        if (response.jobs && response.jobs.length > 0) {
+          setSelectedJob(response.jobs[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Failed to load jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   // Load applied jobs from localStorage on component mount
   useEffect(() => {
@@ -34,50 +69,145 @@ const JobListPage = () => {
     localStorage.setItem('appliedJobs', JSON.stringify(appliedJobIds));
   }, [appliedJobIds]);
 
+  // Fetch user applications from API when authenticated
+  useEffect(() => {
+    const fetchUserApplications = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await apiService.getMyApplications(token);
+          if (response.applications) {
+            const appliedIds = response.applications
+              .filter(app => app.job && app.job._id)
+              .map(app => app.job._id);
+            setAppliedJobIds(appliedIds);
+          }
+        } catch (err) {
+          console.error('Error fetching user applications:', err);
+        }
+      }
+    };
+
+    fetchUserApplications();
+  }, [isAuthenticated]);
+
   // Function to handle job application
-  const handleJobApplication = (jobId) => {
-    if (!appliedJobIds.includes(jobId)) {
-      setAppliedJobIds(prev => [...prev, jobId]);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+  const handleJobApplication = (job) => {
+    // Check if user is authenticated before allowing application
+    if (!isAuthenticated) {
+      setShowAuthRequired(true);
+      setAuthRedirecting(true);
+      // Wait briefly with spinner, then navigate
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      // Hide toast a little after navigation
+      setTimeout(() => {
+        setShowAuthRequired(false);
+        setAuthRedirecting(false);
+      }, 3000);
+      return;
     }
+    
+    // Open application modal
+    setSelectedJobForApplication(job);
+    setShowApplicationModal(true);
+  };
+
+  const handleApplicationSuccess = (jobId) => {
+    setAppliedJobIds(prev => [...prev, jobId]);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
   };
 
   // Filter jobs based on search and filters
   const filteredJobs = useMemo(() => {
-    let jobs = jobListings;
+    let filteredJobs = jobs;
     
     // Filter by tab (all or applied)
     if (activeTab === 'applied') {
-      jobs = jobs.filter(job => appliedJobIds.includes(job.id));
+      filteredJobs = filteredJobs.filter(job => appliedJobIds.includes(job._id));
     }
     
     // Apply search and filter criteria
-    return jobs.filter(job => {
+    return filteredJobs.filter(job => {
+      const jobCategory = job.jobDescription?.category || 'Other';
       const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           job.department.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDepartment = !departmentFilter || job.department === departmentFilter;
+                           jobCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           job.jobDescription?.summary?.overview?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDepartment = !departmentFilter || jobCategory === departmentFilter;
       const matchesType = !typeFilter || job.type === typeFilter;
       const matchesLocation = !locationFilter || job.location === locationFilter;
 
       return matchesSearch && matchesDepartment && matchesType && matchesLocation;
     });
-  }, [searchQuery, departmentFilter, typeFilter, locationFilter, activeTab]);
+  }, [jobs, searchQuery, departmentFilter, typeFilter, locationFilter, activeTab, appliedJobIds]);
 
   // Update selected job when filters change
-  useMemo(() => {
+  useEffect(() => {
     if (filteredJobs.length > 0 && !filteredJobs.includes(selectedJob)) {
       setSelectedJob(filteredJobs[0]);
     }
-  }, [filteredJobs]);
+  }, [filteredJobs, selectedJob]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading jobs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Jobs</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white relative">
       {/* Success Notification */}
       {showNotification && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in z-[10000]">
           <CheckCircle size={20} />
           <span className="font-medium">Application submitted successfully!</span>
+        </div>
+      )}
+      
+      {/* Authentication Required Notification */}
+      {showAuthRequired && (
+        <div className="fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in z-[10000]">
+          {authRedirecting ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <AlertCircle size={20} />
+          )}
+          <div className="flex flex-col">
+            <span className="font-medium">Login required to apply</span>
+            <button 
+              onClick={() => navigate('/login')}
+              className="text-sm underline hover:no-underline text-white/90"
+            >
+              {authRedirecting ? 'Redirecting…' : 'Sign in now'}
+            </button>
+          </div>
         </div>
       )}
       {/* Header Section */}
@@ -168,11 +298,11 @@ const JobListPage = () => {
               {filteredJobs.length > 0 ? (
                 filteredJobs.map(job => (
                   <JobCard
-                    key={job.id}
+                    key={job._id}
                     job={job}
-                    isSelected={selectedJob?.id === job.id}
+                    isSelected={selectedJob?._id === job._id}
                     onClick={() => setSelectedJob(job)}
-                    isApplied={appliedJobIds.includes(job.id)}
+                    isApplied={appliedJobIds.includes(job._id)}
                   />
                 ))
               ) : (
@@ -194,11 +324,21 @@ const JobListPage = () => {
             <JobDetails 
               job={selectedJob} 
               onApply={handleJobApplication}
-              isApplied={selectedJob ? appliedJobIds.includes(selectedJob.id) : false}
+              isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
+              isAuthenticated={isAuthenticated}
+              onApplicationSuccess={handleApplicationSuccess}
             />
           </div>
         </div>
       </div>
+
+      {/* Job Application Modal */}
+      <JobApplicationModal
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        job={selectedJobForApplication}
+        onApplicationSuccess={handleApplicationSuccess}
+      />
     </div>
   );
 };

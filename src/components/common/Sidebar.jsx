@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Briefcase, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
+  const { startNavigation } = useNavigation();
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -80,6 +82,8 @@ const Sidebar = ({ isOpen, onToggle }) => {
                       }
                     `}
                     onClick={() => {
+                      // Show navigation spinner
+                      startNavigation();
                       // Close sidebar on mobile when link is clicked
                       if (window.innerWidth < 1024) {
                         onToggle();

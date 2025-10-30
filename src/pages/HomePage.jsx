@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotification } from '../contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '../contexts/NavigationContext';
+import Swal from 'sweetalert2';
 import { 
   Building2, 
   Users, 
@@ -28,18 +29,32 @@ import {
 
 const HomePage = () => {
   const { isAuthenticated, loading } = useAuth();
-  const { showInfo } = useNotification();
   const navigate = useNavigate();
+  const { startNavigation } = useNavigation();
 
   useEffect(() => {
-    // Show notification for logged-out users after a short delay
+    // Show SweetAlert for logged-out users after a short delay
     if (!loading && !isAuthenticated) {
       const timer = setTimeout(() => {
-        showInfo('Please sign in to access all features and apply for positions.');
-      }, 1500);
+        Swal.fire({
+          title: 'Welcome to Signavox Technologies!',
+          text: 'Please sign in to access all features and apply for positions.',
+          icon: 'info',
+          confirmButtonText: 'Sign In',
+          showCancelButton: true,
+          cancelButtonText: 'Continue Browsing',
+          confirmButtonColor: '#3B82F6',
+          cancelButtonColor: '#6B7280'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            startNavigation();
+            navigate('/login');
+          }
+        });
+      }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, loading, showInfo]);
+  }, [isAuthenticated, loading, navigate]);
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -50,7 +65,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }
@@ -82,16 +97,16 @@ const HomePage = () => {
         </div>
         
         {/* Floating Geometric Shapes */}
-        <div className="absolute inset-0 overflow-hidden">
+        {/* <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-60 animate-float"></div>
           <div className="absolute top-40 right-20 w-16 h-16 bg-purple-100 rounded-full opacity-60 animate-float" style={{animationDelay: '1s'}}></div>
           <div className="absolute bottom-40 left-20 w-12 h-12 bg-green-100 rounded-full opacity-60 animate-float" style={{animationDelay: '2s'}}></div>
           <div className="absolute bottom-20 right-10 w-24 h-24 bg-orange-100 rounded-full opacity-60 animate-float" style={{animationDelay: '0.5s'}}></div>
           <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-cyan-100 rounded-full opacity-60 animate-float" style={{animationDelay: '1.5s'}}></div>
           <div className="absolute top-1/3 right-1/3 w-14 h-14 bg-pink-100 rounded-full opacity-60 animate-float" style={{animationDelay: '2.5s'}}></div>
-        </div>
+        </div> */}
         
-        <div className="relative max-w-7xl mx-auto px-6 py-20">
+        <div className="relative max-w-7xl mx-auto px-6 py-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               {/* Company Badge */}
@@ -120,7 +135,7 @@ const HomePage = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => scrollToSection('careers')}
-                  className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-lg text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                  className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-lg text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
                 >
                   Explore Careers
                   <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -133,7 +148,10 @@ const HomePage = () => {
                 </button>
                 {!isAuthenticated && (
                   <button 
-                    onClick={() => navigate('/login')}
+                    onClick={() => {
+                      startNavigation();
+                      navigate('/login');
+                    }}
                     className="px-8 py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-2xl font-semibold text-lg hover:bg-blue-50 transition-all duration-300"
                   >
                     Sign In
@@ -146,7 +164,7 @@ const HomePage = () => {
             <div className="relative">
               <div className="grid grid-cols-2 gap-6">
                 {/* Card 1 */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Code className="w-8 h-8 text-white" />
                   </div>
@@ -159,7 +177,7 @@ const HomePage = () => {
                 </div>
                 
                 {/* Card 2 */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Cloud className="w-8 h-8 text-white" />
                   </div>
@@ -172,7 +190,7 @@ const HomePage = () => {
                 </div>
                 
                 {/* Card 3 */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Brain className="w-8 h-8 text-white" />
                   </div>
@@ -185,7 +203,7 @@ const HomePage = () => {
                 </div>
                 
                 {/* Card 4 */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Shield className="w-8 h-8 text-white" />
                   </div>
@@ -226,7 +244,7 @@ const HomePage = () => {
           </div>
           
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            <div className="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+            <div className="bg-white rounded-3xl p-8 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse-glow">
                 <Target className="w-8 h-8 text-white" />
               </div>
@@ -237,7 +255,7 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+            <div className="bg-white rounded-3xl p-8 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse-glow">
                 <Heart className="w-8 h-8 text-white" />
               </div>
@@ -248,7 +266,7 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+            <div className="bg-white rounded-3xl p-8 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse-glow">
                 <Rocket className="w-8 h-8 text-white" />
               </div>
@@ -262,7 +280,7 @@ const HomePage = () => {
 
           {/* Services Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Globe className="w-6 h-6 text-white" />
               </div>
@@ -270,7 +288,7 @@ const HomePage = () => {
               <p className="text-sm text-gray-600">Transform your online presence with innovative digital solutions</p>
             </div>
             
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Cloud className="w-6 h-6 text-white" />
               </div>
@@ -278,7 +296,7 @@ const HomePage = () => {
               <p className="text-sm text-gray-600">Scalable and secure cloud solutions for enhanced agility</p>
             </div>
             
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Code className="w-6 h-6 text-white" />
               </div>
@@ -286,7 +304,7 @@ const HomePage = () => {
               <p className="text-sm text-gray-600">Advanced engineering solutions tailored to industry demands</p>
             </div>
             
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Brain className="w-6 h-6 text-white" />
               </div>
@@ -405,7 +423,13 @@ const HomePage = () => {
                   <p className="text-blue-200 text-sm">Java, Spring, Database, Web Technologies</p>
                 </div>
               </div>
-              <button className="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
+              <button 
+                onClick={() => {
+                  startNavigation();
+                  navigate('/jobs');
+                }}
+                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+              >
                 View All Positions
               </button>
             </div>
@@ -434,14 +458,17 @@ const HomePage = () => {
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <button 
               onClick={() => scrollToSection('careers')}
-              className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl"
+              className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
             >
               Apply Now
               <ArrowRight className="inline-block ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
             {!isAuthenticated && (
               <button 
-                onClick={() => navigate('/register')}
+                onClick={() => {
+                  startNavigation();
+                  navigate('/register');
+                }}
                 className="px-12 py-6 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-2xl font-semibold text-xl hover:bg-white/30 transition-all duration-300 text-center"
               >
                 Join Us
@@ -488,7 +515,7 @@ const HomePage = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <button 
           onClick={() => scrollToSection('careers')}
-          className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center group animate-pulse-glow"
+          className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full transition-all duration-300 transform hover:scale-110 flex items-center justify-center group animate-pulse-glow"
         >
           <Users className="w-6 h-6 group-hover:scale-110 transition-transform" />
         </button>

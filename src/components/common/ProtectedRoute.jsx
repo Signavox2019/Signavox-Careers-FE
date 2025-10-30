@@ -1,21 +1,39 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { isAuthPage, getRedirectPath } from '../../utils/routeProtection';
+import { useEffect, useState } from 'react';
 
 const ProtectedRoute = ({ children, requireAuth = true, authPages = [] }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, checkTokenValidity } = useAuth();
   const location = useLocation();
+  const [isValidating, setIsValidating] = useState(false);
 
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+  // Validate token when route changes and user appears authenticated
+  useEffect(() => {
+    const validateOnRouteChange = async () => {
+      if (isAuthenticated && !loading) {
+        setIsValidating(true);
+        try {
+          const isValid = await checkTokenValidity();
+          if (!isValid) {
+            // Token is invalid, user will be redirected to login
+            console.log('Token validation failed, redirecting to login');
+          }
+        } catch (error) {
+          console.error('Token validation error:', error);
+        } finally {
+          setIsValidating(false);
+        }
+      }
+    };
+
+    validateOnRouteChange();
+  }, [location.pathname, isAuthenticated, loading, checkTokenValidity]);
+
+  // Do not block rendering with a loader; allow children to render while auth is resolving
+  // This helps avoid pages appearing to load indefinitely
+  if (loading || isValidating) {
+    return children;
   }
 
   // Get redirect path based on authentication status and current path
@@ -38,7 +56,7 @@ const ProtectedRoute = ({ children, requireAuth = true, authPages = [] }) => {
   // Additional check for specific auth pages when user is authenticated
   if (isAuthenticated && authPages.length > 0) {
     const currentPath = location.pathname;
-    const isCurrentAuthPage = authPages.some(page => currentPath.includes(page));
+    const isCurrentAuthPage = authPages.some(page => currentPath === `/${page}` || currentPath.startsWith(`/${page}/`));
     
     if (isCurrentAuthPage) {
       return <Navigate to="/" replace />;
