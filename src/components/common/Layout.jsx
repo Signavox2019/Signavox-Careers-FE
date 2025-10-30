@@ -92,7 +92,7 @@ const Layout = ({ children }) => {
 
         {/* Main content */}
         <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-100">
-          <div className="min-h-full">
+          <div className="min-h-[calc(100vh-4rem)]">
             {children}
           </div>
         </main>

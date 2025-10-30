@@ -17,9 +17,9 @@ const FilterDropdown = ({ label, options, value, onChange }) => {
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex-1 min-w-[160px] sm:min-w-[200px] max-w-full" ref={dropdownRef}>
       <button 
-        className="flex items-center justify-between gap-2 px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors min-w-[180px]"
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm font-medium text-gray-700 truncate">

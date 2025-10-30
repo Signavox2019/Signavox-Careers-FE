@@ -349,7 +349,380 @@ const ProfilePage = () => {
         />
       )}
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm h-[calc(100vh)]">
+        {/* MOBILE LAYOUT: stacked, no sidebar, horizontal tabs at top */}
+        <div className="block md:hidden bg-white rounded-lg shadow-sm min-h-[calc(100vh)]">
+          {/* Profile Top */}
+          <div className="flex flex-col items-center py-8 border-b border-gray-200 bg-purple-50">
+            {profileData.profileImage ? (
+              <img src={profileData.profileImage} alt="Profile" className="w-24 h-24 rounded-full object-cover mb-2" />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mb-2 ring-4 ring-blue-100">
+                <span className="text-white text-3xl font-semibold">
+                  {profileData.firstName?.charAt(0) || 'U'}
+                </span>
+              </div>
+            )}
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-1">
+              {profileData.name || `${profileData.firstName} ${profileData.lastName}`}
+            </h2>
+            <p className="text-sm text-gray-600 mb-1">ID: {profileData._id}</p>
+            <div className="w-full px-4 py-1 bg-purple-100 rounded-lg mb-3 flex justify-center">
+              <p className="text-xs text-blue-600 text-center">
+                {profileData.role === 'candidate' ? 'Candidate Profile' : 'User Profile'}
+              </p>
+            </div>
+          </div>
+          {/* Tabs Horizontal Bar */}
+          <div className="flex overflow-x-auto border-b border-gray-200 bg-white sticky top-0 z-10">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 px-4 py-4 text-sm whitespace-nowrap font-medium transition-colors border-b-2 ${activeTab === tab.id ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent text-gray-700 hover:bg-gray-50'}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {/* Tab Content */}
+          <div className="p-4 bg-gradient-to-br from-white to-gray-50 min-h-[calc(100vh-30vh)]">
+            {/* The following blocks should basically match the right column of the desktop layout but stacked */}
+            {/* Only show details for selected tab - copy logic from below, adjust paddings etc for mobile readability */}
+            {/* COPY TAB CONTENT FROM EXISTING - adjust grid to single-col when mobile */}
+              {activeTab === 'resume' && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Your Resume</h2>
+                  {resumeLink ? (
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <a
+                        href={resumeLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-700 hover:underline text-sm truncate"
+                      >
+                        {profileData.resumeFileName || 'View current resume'}
+                      </a>
+                      <span className="text-xs text-gray-500">Updated automatically after upload</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No resume on file.</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'resume' && (
+                <div className="mb-10">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Resume</h2>
+                  <form onSubmit={handleResumeUpload} className="space-y-4 max-w-xl">
+                    <label className="block">
+                      <div className="w-full p-6 border-2 border-dashed border-indigo-200 rounded-xl bg-indigo-50/30 hover:bg-indigo-50 transition cursor-pointer">
+                        <p className="text-sm text-gray-600">Drag and drop your resume here, or click to browse</p>
+                        <p className="mt-1 text-xs text-gray-400">PDF, DOC, DOCX up to 5MB</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => setResumeFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                        className="hidden"
+                      />
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="submit"
+                        disabled={uploading}
+                        className={`px-6 py-2 rounded-lg text-white shadow-sm ${uploading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                      >
+                        {uploading ? 'Uploading…' : 'Upload Resume'}
+                      </button>
+                      {resumeFile && (
+                        <span className="text-sm text-gray-600 truncate max-w-[240px]">{resumeFile.name}</span>
+                      )}
+                    </div>
+                      {uploadMessage && (
+                        <p className={`${uploadMessage.type === 'success' ? 'text-green-600' : 'text-red-600'} text-sm`}>{uploadMessage.text}</p>
+                      )}
+                    </form>
+                  </div>
+              )}
+              {activeTab === 'personal' && (
+                <div>
+                  <div className="mb-10">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Personal Information</h2>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Full Name:</label>
+                        <p className="text-gray-900">{profileData.name || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Date of Birth:</label>
+                        <p className="text-gray-900">{formatDate(profileData.DOB)}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Gender:</label>
+                        <p className="text-gray-900 capitalize">{profileData.gender || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Email:</label>
+                        <p className="text-gray-900">{profileData.email || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number:</label>
+                        <p className="text-gray-900">{profileData.phoneNumber || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">PAN:</label>
+                        <p className="text-gray-900">{profileData.pan || 'Not provided'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mb-10">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Address</h2>
+                      <button className="px-4 py-2 bg-indigo-600/10 text-indigo-700 rounded-lg hover:bg-indigo-600/20 transition-colors">
+                        Edit Info
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Current Address:</label>
+                        <p className="text-gray-900">{profileData.currentAddress || 'Not provided'}</p>
+          </div>
+            <div>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Permanent Address:</label>
+                        <p className="text-gray-900">{profileData.permanentAddress || 'Not provided'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {profileData.socialLinks && (
+                    <div className="mb-10">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4">Social Links</h2>
+              <div className="space-y-3">
+                        {profileData.socialLinks.linkedin && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">LinkedIn:</label>
+                            <a href={profileData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-indigo-700 hover:underline">
+                              {profileData.socialLinks.linkedin}
+                            </a>
+                          </div>
+                        )}
+                        {profileData.socialLinks.github && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">GitHub:</label>
+                            <a href={profileData.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-indigo-700 hover:underline">
+                              {profileData.socialLinks.github}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {activeTab === 'education' && (
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Education Timeline</h2>
+                    <button onClick={() => { setEditingEduIndex(-1); setEduForm(emptyEdu); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add Education</button>
+                  </div>
+                  {(editingEduIndex >= 0 || Object.values(eduForm).some(v => v)) && (
+                    <div className="mb-8 p-5 border border-indigo-100 rounded-xl bg-indigo-50/30">
+                      <div className="grid grid-cols-2 gap-4">
+                        <input value={eduForm.programOrDegree} onChange={(e) => setEduForm({ ...eduForm, programOrDegree: e.target.value })} placeholder="Program / Degree" className="px-3 py-2 border rounded-lg" />
+                        <input value={eduForm.branchOrSpecialization} onChange={(e) => setEduForm({ ...eduForm, branchOrSpecialization: e.target.value })} placeholder="Branch / Specialization" className="px-3 py-2 border rounded-lg" />
+                        <input value={eduForm.institution} onChange={(e) => setEduForm({ ...eduForm, institution: e.target.value })} placeholder="Institution" className="px-3 py-2 border rounded-lg" />
+                        <input value={eduForm.boardOrUniversity} onChange={(e) => setEduForm({ ...eduForm, boardOrUniversity: e.target.value })} placeholder="Board / University" className="px-3 py-2 border rounded-lg" />
+                        <input value={eduForm.passedYear} onChange={(e) => setEduForm({ ...eduForm, passedYear: e.target.value })} placeholder="Passed Year" className="px-3 py-2 border rounded-lg" />
+                        <input value={eduForm.percentageOrCGPA} onChange={(e) => setEduForm({ ...eduForm, percentageOrCGPA: e.target.value })} placeholder="Percentage / CGPA" className="px-3 py-2 border rounded-lg" />
+                      </div>
+                      <div className="mt-4 flex gap-3">
+                        <button onClick={handleAddOrUpdateEducation} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{editingEduIndex >= 0 ? 'Update' : 'Add'}</button>
+                        <button onClick={() => { setEditingEduIndex(-1); setEduForm(emptyEdu); }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {educationList && educationList.length > 0 ? (
+                    <ol className="relative border-l border-gray-200 pl-6 space-y-6">
+                      {educationList.map((edu, index) => (
+                        <li key={index} className="ml-3">
+                          <div className="absolute -left-2.5 mt-1 w-5 h-5 bg-indigo-600 rounded-full border-4 border-white shadow" />
+                          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                            <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{edu.programOrDegree || 'Program / Degree'}</h3>
+                                <p className="text-sm text-gray-500">{edu.branchOrSpecialization || 'Specialization'}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => handleEditEducation(index)} className="px-3 py-1.5 text-xs rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100">Edit</button>
+                                <button onClick={() => handleDeleteEducation(index)} className="px-3 py-1.5 text-xs rounded-md bg-red-50 text-red-600 hover:bg-red-100">Delete</button>
+                              </div>
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-500">Institution</p>
+                                <p className="font-medium text-gray-900">{edu.institution || '—'}</p>
+                              </div>
+                            <div>
+                                <p className="text-gray-500">Board / University</p>
+                                <p className="font-medium text-gray-900">{edu.boardOrUniversity || '—'}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Passed Year</p>
+                                <p className="font-medium text-gray-900">{edu.passedYear || '—'}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Percentage / CGPA</p>
+                                <p className="font-medium text-gray-900">{edu.percentageOrCGPA || '—'}</p>
+                            </div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">No education details added yet.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {activeTab === 'certs_skills' && (
+                <div className="space-y-10">
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Skills</h2>
+                      <div className="flex items-stretch gap-0">
+                        <input 
+                          value={newSkill} 
+                          onChange={(e) => setNewSkill(e.target.value)} 
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(); } }}
+                          placeholder="Type a skill and press Enter" 
+                          className="px-4 py-2 border border-r-0 rounded-l-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        />
+                        <button 
+                          onClick={handleAddSkill} 
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-r-lg text-sm hover:from-indigo-700 hover:to-indigo-800"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                    {skillsList && skillsList.length > 0 ? (
+                      <div className="flex flex-wrap gap-3">
+                        {skillsList.map((skill, index) => (
+                          <span key={index} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-white text-indigo-700 rounded-full text-sm border border-indigo-200 shadow-sm">
+                            {skill}
+                            <button aria-label={`Remove ${skill}`} onClick={() => handleDeleteSkill(skill)} className="text-indigo-700/80 hover:text-indigo-900">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                        <p className="text-gray-500">No skills added yet. Start by adding one above.</p>
+                      </div>
+                    )}
+                  </div>
+
+                            <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Certifications</h2>
+                      <button onClick={() => { setEditingCertIndex(-1); setCertForm(emptyCert); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add Certification</button>
+                    </div>
+                    {(editingCertIndex >= 0 || Object.values(certForm).some(v => v)) && (
+                      <div className="mb-6 p-5 border border-indigo-100 rounded-xl bg-indigo-50/30">
+                        <div className="grid grid-cols-2 gap-4">
+                          <input value={certForm.certificationName} onChange={(e) => setCertForm({ ...certForm, certificationName: e.target.value })} placeholder="Certification Name" className="px-3 py-2 border rounded-lg" />
+                          <input value={certForm.issuedBy} onChange={(e) => setCertForm({ ...certForm, issuedBy: e.target.value })} placeholder="Issued By" className="px-3 py-2 border rounded-lg" />
+                        </div>
+                        <div className="mt-4 flex gap-3">
+                          <button onClick={handleAddOrUpdateCert} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{editingCertIndex >= 0 ? 'Update' : 'Add'}</button>
+                          <button onClick={() => { setEditingCertIndex(-1); setCertForm(emptyCert); }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+                        </div>
+                            </div>
+                    )}
+                    {certList && certList.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        {certList.map((cert, index) => (
+                          <div key={index} className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition">
+                            <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{cert.certificationName || 'Certification'}</h3>
+                                <p className="text-sm text-gray-500">Issued by {cert.issuedBy || '—'}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => handleEditCert(index)} className="px-3 py-1.5 text-xs rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100">Edit</button>
+                                <button onClick={() => handleDeleteCert(index)} className="px-3 py-1.5 text-xs rounded-md bg-red-50 text-red-600 hover:bg-red-100">Delete</button>
+                              </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">No certifications added yet.</p>
+                    </div>
+                  )}
+                </div>
+                </div>
+              )}
+              {activeTab === 'experience' && (
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Experience</h2>
+                    <button onClick={() => { setEditingExpIndex(-1); setExpForm(emptyExp); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add Experience</button>
+                  </div>
+
+                  {(editingExpIndex >= 0 || Object.values(expForm).some(v => v)) && (
+                    <div className="mb-8 p-5 border border-indigo-100 rounded-xl bg-indigo-50/30">
+                      <div className="grid grid-cols-2 gap-4">
+                        <input value={expForm.jobTitle} onChange={(e) => setExpForm({ ...expForm, jobTitle: e.target.value })} placeholder="Job Title" className="px-3 py-2 border rounded-lg" />
+                        <input value={expForm.companyName} onChange={(e) => setExpForm({ ...expForm, companyName: e.target.value })} placeholder="Company" className="px-3 py-2 border rounded-lg" />
+                        <input value={expForm.startDate} onChange={(e) => setExpForm({ ...expForm, startDate: e.target.value })} placeholder="Start Date (YYYY-MM)" className="px-3 py-2 border rounded-lg" />
+                        <input value={expForm.endDate} onChange={(e) => setExpForm({ ...expForm, endDate: e.target.value })} placeholder="End Date (YYYY-MM or Present)" className="px-3 py-2 border rounded-lg" />
+                        <textarea value={expForm.description} onChange={(e) => setExpForm({ ...expForm, description: e.target.value })} placeholder="Short description" className="col-span-2 px-3 py-2 border rounded-lg" />
+                      </div>
+                      <div className="mt-4 flex gap-3">
+                        <button onClick={handleAddOrUpdateExp} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{editingExpIndex >= 0 ? 'Update' : 'Add'}</button>
+                        <button onClick={() => { setEditingExpIndex(-1); setExpForm(emptyExp); }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {experiencedFlag === false && (!expList || expList.length === 0) ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500 mb-2">No work experience yet.</p>
+                      <p className="text-sm text-gray-400">Fresher</p>
+                    </div>
+                  ) : expList && expList.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-4">
+                      {expList.map((exp, index) => (
+                        <div key={index} className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">{exp.jobTitle || 'Role'}</h3>
+                              <p className="text-sm text-gray-500">{exp.companyName || 'Company'} • {formatMonthYear(exp.startDate)} - {formatMonthYear(exp.endDate)}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEditExp(index)} className="px-3 py-1.5 text-xs rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100">Edit</button>
+                              <button onClick={() => handleDeleteExp(index)} className="px-3 py-1.5 text-xs rounded-md bg-red-50 text-red-600 hover:bg-red-100">Delete</button>
+                            </div>
+                          </div>
+                          {exp.description && <p className="mt-3 text-sm text-gray-700">{exp.description}</p>}
+              </div>
+                      ))}
+            </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">No work experience added yet.</p>
+              </div>
+                  )}
+                </div>
+              )}
+              </div>
+          </div>
+        </div>
+        {/* DESKTOP/TABLET LAYOUT (unchanged): sidebar + details grid */}
+        <div className="hidden md:block bg-white rounded-lg shadow-sm min-h-[calc(100vh)]">
           <div className="flex items-start">
             <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col sticky h-[calc(100vh)] overflow-y-hidden hover:overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
@@ -731,7 +1104,6 @@ const ProfilePage = () => {
         </div>
       </div>
     </div>
-  </div>
   );
 };
 

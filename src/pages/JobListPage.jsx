@@ -25,6 +25,8 @@ const JobListPage = () => {
   const [error, setError] = useState(null);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [selectedJobForApplication, setSelectedJobForApplication] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileView, setMobileView] = useState('list'); // 'list' | 'details'
   
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +35,24 @@ const JobListPage = () => {
   const departments = [...new Set(jobs.map(job => job.jobDescription?.category || 'Other'))];
   const types = [...new Set(jobs.map(job => job.type))];
   const locations = [...new Set(jobs.map(job => job.location))];
+
+  // Detect mobile viewport (Tailwind md breakpoint ~ 768px)
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)');
+    const onChange = (e) => setIsMobile(e.matches);
+    setIsMobile(mql.matches);
+    mql.addEventListener ? mql.addEventListener('change', onChange) : mql.addListener(onChange);
+    return () => {
+      mql.removeEventListener ? mql.removeEventListener('change', onChange) : mql.removeListener(onChange);
+    };
+  }, []);
+
+  // Reset mobile view when leaving mobile
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileView('list');
+    }
+  }, [isMobile]);
 
   // Fetch jobs from API
   useEffect(() => {
@@ -256,80 +276,169 @@ const JobListPage = () => {
         </div>
       </div>
 
-      {/* Main Content - Two Column Layout */}
+      {/* Responsive Content */}
       <div className="max-w-7xl mx-auto px-2 py-4">
-        <div className="grid grid-cols-12 gap-3 h-[calc(100vh-120px)]">
-          {/* Left Column - Job List */}
-          <div className="col-span-4 bg-gradient-to-b from-gray-50 to-white flex flex-col overflow-hidden border border-gray-200 shadow-sm">
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200 bg-white">
-              <button
-                className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
-                  activeTab === 'all'
-                    ? 'border-blue-600 text-blue-600 bg-blue-50'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveTab('all')}
-              >
-                All Jobs
-              </button>
-              <button
-                className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
-                  activeTab === 'applied'
-                    ? 'border-blue-600 text-blue-600 bg-blue-50'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveTab('applied')}
-              >
-                Applied Jobs
-              </button>
-            </div>
-
-            {/* Job Count */}
-            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found
-              </p>
-            </div>
-            
-            {/* Job List */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredJobs.length > 0 ? (
-                filteredJobs.map(job => (
-                  <JobCard
-                    key={job._id}
-                    job={job}
-                    isSelected={selectedJob?._id === job._id}
-                    onClick={() => setSelectedJob(job)}
-                    isApplied={appliedJobIds.includes(job._id)}
-                  />
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-full p-8">
-                  <div className="text-center">
-                    <p className="text-gray-500 text-sm">
-                      {activeTab === 'applied' 
-                        ? 'You haven\'t applied to any jobs yet' 
-                        : 'No jobs found matching your criteria'}
-                    </p>
-                  </div>
+        {isMobile ? (
+          <div className="h-[calc(100vh-120px)]">
+            {mobileView === 'list' ? (
+              <div className="bg-gradient-to-b from-gray-50 to-white flex flex-col h-full overflow-hidden border border-gray-200 shadow-sm">
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200 bg-white">
+                  <button
+                    className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                      activeTab === 'all'
+                        ? 'border-blue-600 text-blue-600 bg-blue-50'
+                        : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setActiveTab('all')}
+                  >
+                    All Jobs
+                  </button>
+                  <button
+                    className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                      activeTab === 'applied'
+                        ? 'border-blue-600 text-blue-600 bg-blue-50'
+                        : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setActiveTab('applied')}
+                  >
+                    Applied Jobs
+                  </button>
                 </div>
-              )}
+
+                {/* Job Count */}
+                <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                    {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found
+                  </p>
+                </div>
+
+                {/* Job List */}
+                <div className="flex-1 overflow-y-auto">
+                  {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
+                      <JobCard
+                        key={job._id}
+                        job={job}
+                        isSelected={selectedJob?._id === job._id}
+                        onClick={() => {
+                          setSelectedJob(job);
+                          setMobileView('details');
+                        }}
+                        isApplied={appliedJobIds.includes(job._id)}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center h-full p-8">
+                      <div className="text-center">
+                        <p className="text-gray-500 text-sm">
+                          {activeTab === 'applied' 
+                            ? 'You haven\'t applied to any jobs yet' 
+                            : 'No jobs found matching your criteria'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-br from-white to-gray-50 h-full overflow-hidden border border-gray-200 shadow-sm flex flex-col">
+                {/* Mobile Back */}
+                <div className="px-3 py-3 border-b border-gray-200 bg-white">
+                  <button
+                    onClick={() => setMobileView('list')}
+                    className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    ← Back to jobs
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <JobDetails 
+                    job={selectedJob} 
+                    onApply={handleJobApplication}
+                    isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
+                    isAuthenticated={isAuthenticated}
+                    onApplicationSuccess={handleApplicationSuccess}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-12 gap-3 h-[calc(100vh-120px)]">
+            {/* Left Column - Job List */}
+            <div className="col-span-4 bg-gradient-to-b from-gray-50 to-white flex flex-col overflow-hidden border border-gray-200 shadow-sm">
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200 bg-white">
+                <button
+                  className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                    activeTab === 'all'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setActiveTab('all')}
+                >
+                  All Jobs
+                </button>
+                <button
+                  className={`flex-1 px-6 py-5 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                    activeTab === 'applied'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setActiveTab('applied')}
+                >
+                  Applied Jobs
+                </button>
+              </div>
+
+              {/* Job Count */}
+              <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                  {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found
+                </p>
+              </div>
+              
+              {/* Job List */}
+              <div className="flex-1 overflow-y-auto">
+                {filteredJobs.length > 0 ? (
+                  filteredJobs.map(job => (
+                    <JobCard
+                      key={job._id}
+                      job={job}
+                      isSelected={selectedJob?._id === job._id}
+                      onClick={() => setSelectedJob(job)}
+                      isApplied={appliedJobIds.includes(job._id)}
+                    />
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-full p-8">
+                    <div className="text-center">
+                      <p className="text-gray-500 text-sm">
+                        {activeTab === 'applied' 
+                          ? 'You haven\'t applied to any jobs yet' 
+                          : 'No jobs found matching your criteria'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Job Details */}
+            <div className="col-span-8 bg-gradient-to-br from-white to-gray-50 overflow-hidden border border-gray-200 shadow-sm">
+              <JobDetails 
+                job={selectedJob} 
+                onApply={handleJobApplication}
+                isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
+                isAuthenticated={isAuthenticated}
+                onApplicationSuccess={handleApplicationSuccess}
+              />
             </div>
           </div>
-
-          {/* Right Column - Job Details */}
-          <div className="col-span-8 bg-gradient-to-br from-white to-gray-50 overflow-hidden border border-gray-200 shadow-sm">
-            <JobDetails 
-              job={selectedJob} 
-              onApply={handleJobApplication}
-              isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
-              isAuthenticated={isAuthenticated}
-              onApplicationSuccess={handleApplicationSuccess}
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Job Application Modal */}
