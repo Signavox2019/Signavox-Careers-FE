@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown, Settings } from 'lucide-react';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import ChangePasswordModal from './ChangePasswordModal';
 
 const UserProfileDropdown = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { startNavigation } = useNavigation();
@@ -79,6 +81,14 @@ const UserProfileDropdown = ({ user, onLogout }) => {
               <User size={16} className="text-gray-500" />
               Profile
             </button>
+
+            <button
+              onClick={() => { setShowChangePassword(true); setIsOpen(false); }}
+              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors duration-200"
+            >
+              <Settings size={16} className="text-gray-500" />
+              Settings
+            </button>
             
             <button
               onClick={handleLogout}
@@ -90,6 +100,12 @@ const UserProfileDropdown = ({ user, onLogout }) => {
           </div>
         </div>
       )}
+
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+        defaultEmail={user?.email}
+      />
     </div>
   );
 };

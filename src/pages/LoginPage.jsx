@@ -113,21 +113,17 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black">
+    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        // style={{
-        //   backgroundImage: `${loginBG}`,
-        //   backgroundAttachment: 'fixed'
-        // }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat overflow-hidden"
       >
         {/* Fullscreen, creative, and professional background */}
         <img
           src={loginBG}
           alt="Login background"
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
-          style={{ minHeight: '100vh', minWidth: '100vw', filter: 'brightness(0.7) blur(1px)' }}
+          style={{ filter: 'brightness(0.7) blur(1px)' }}
         />
         {/* Creative overlay with branding gradients & effects */}
         <div className="absolute inset-0 z-10 pointer-events-none">
@@ -160,48 +156,48 @@ const LoginPage = () => {
         </div>
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md z-20">
         {/* Login Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Building2 className="w-10 h-10 text-white" />
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+              <Building2 className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               Welcome Back
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Sign in to your <span className="text-blue-600 font-semibold">Signavox</span> account
             </p>
           </div>
 
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                  className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                     errors.email ? 'border-red-400' : 'border-gray-200'
                   }`}
                   placeholder="Enter your email"
                 />
               </div>
               {errors.email && (
-                <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                  <AlertCircle className="w-4 h-4" />
+                <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                  <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>{errors.email}</span>
                 </div>
               )}
@@ -209,19 +205,19 @@ const LoginPage = () => {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-12 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                  className={`w-full pl-9 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                     errors.password ? 'border-red-400' : 'border-gray-200'
                   }`}
                   placeholder="Enter your password"
@@ -231,20 +227,20 @@ const LoginPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                 </button>
               </div>
               {errors.password && (
-                <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                  <AlertCircle className="w-4 h-4" />
+                <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                  <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>{errors.password}</span>
                 </div>
               )}
             </div>
 
             {/* Forgot Password */}
-            <div className="flex items-center justify-end">
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+            <div className="flex items-center justify-end pt-1">
+              <Link to="/forgot-password" className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -253,25 +249,25 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  <span>Signing in...</span>
                 </div>
               ) : (
                 <>
                   Sign In
-                  <ArrowRight className="inline-block ml-2 w-5 h-5" />
+                  <ArrowRight className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                 </>
               )}
             </button>
           </form>
 
           {/* Sign Up Link */}
-          <div className="text-center mt-8">
-            <p className="text-gray-600">
+          <div className="text-center mt-4 sm:mt-6">
+            <p className="text-xs sm:text-sm text-gray-600">
               Don't have an account?{' '}
               <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
                 Sign up here

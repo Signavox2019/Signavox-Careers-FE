@@ -33,13 +33,13 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen lg:min-h-screen bg-gray-50 flex">
       <NavigationSpinner />
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
       {/* Main content area */}
-      <div className="flex-1 flex flex-col lg:ml-16">
+      <div className="flex-1 flex flex-col lg:ml-16 h-full lg:h-auto">
         {/* Top navbar */}
         <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-[9998] shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -91,8 +91,8 @@ const Layout = ({ children }) => {
         </nav>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-100">
-          <div className="min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-white to-gray-100 h-full lg:h-auto">
+          <div className="h-full lg:min-h-[calc(100vh-4rem)]">
             {children}
           </div>
         </main>

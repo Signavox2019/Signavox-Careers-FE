@@ -3,17 +3,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useNavigation } from '../contexts/NavigationContext';
 import Swal from 'sweetalert2';
-import { 
-  Building2, 
-  Users, 
-  Code, 
-  Cloud, 
-  Brain, 
-  Shield, 
-  ArrowRight, 
-  Star, 
-  Award, 
-  Globe, 
+import {
+  Building2,
+  Users,
+  Code,
+  Cloud,
+  Brain,
+  Shield,
+  ArrowRight,
+  Star,
+  Award,
+  Globe,
   Zap,
   Target,
   Heart,
@@ -86,7 +86,7 @@ const HomePage = () => {
           animation: gradient-shift 3s ease infinite;
         }
       `}</style>
-      
+
       {/* Hero Section - White Shades Background */}
       <section className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden min-h-screen flex items-center">
         {/* Background Pattern */}
@@ -95,7 +95,7 @@ const HomePage = () => {
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}></div>
         </div>
-        
+
         {/* Floating Geometric Shapes */}
         {/* <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-60 animate-float"></div>
@@ -105,7 +105,7 @@ const HomePage = () => {
           <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-cyan-100 rounded-full opacity-60 animate-float" style={{animationDelay: '1.5s'}}></div>
           <div className="absolute top-1/3 right-1/3 w-14 h-14 bg-pink-100 rounded-full opacity-60 animate-float" style={{animationDelay: '2.5s'}}></div>
         </div> */}
-        
+
         <div className="relative max-w-7xl mx-auto px-6 py-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
@@ -116,7 +116,7 @@ const HomePage = () => {
                 </div>
                 <span className="text-gray-600 font-medium text-lg">Signavox Technologies</span>
               </div>
-              
+
               {/* Main Heading */}
               <h1 className="text-6xl lg:text-7xl font-bold leading-tight text-gray-900">
                 Shaping the Future of
@@ -124,30 +124,30 @@ const HomePage = () => {
                   Technology
                 </span>
               </h1>
-              
+
               {/* Subtitle */}
               <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                Join our innovative team and be part of a company that delivers cutting-edge 
+                Join our innovative team and be part of a company that delivers cutting-edge
                 digital solutions, cloud technologies, and AI-powered automation.
               </p>
-              
+
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button 
+                <button
                   onClick={() => scrollToSection('careers')}
                   className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-lg text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
                 >
                   Explore Careers
                   <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button 
+                <button
                   onClick={() => scrollToSection('about')}
                   className="px-8 py-4 border-2 border-gray-300 rounded-2xl font-semibold text-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
                 >
                   Learn More
                 </button>
                 {!isAuthenticated && (
-                  <button 
+                  <button
                     onClick={() => {
                       startNavigation();
                       navigate('/login');
@@ -159,12 +159,14 @@ const HomePage = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Right Side - Interactive Cards */}
             <div className="relative">
               <div className="grid grid-cols-2 gap-6">
                 {/* Card 1 */}
-                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 cursor-pointer"
+                  onClick={() => navigate('/jobs')}
+                >
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Code className="w-8 h-8 text-white" />
                   </div>
@@ -175,9 +177,11 @@ const HomePage = () => {
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
-                
+
                 {/* Card 2 */}
-                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 cursor-pointer"
+                  onClick={() => navigate('/jobs')}
+                >
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Cloud className="w-8 h-8 text-white" />
                   </div>
@@ -188,9 +192,11 @@ const HomePage = () => {
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
-                
+
                 {/* Card 3 */}
-                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 cursor-pointer"
+                  onClick={() => navigate('/jobs')}
+                >
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Brain className="w-8 h-8 text-white" />
                   </div>
@@ -201,9 +207,11 @@ const HomePage = () => {
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
-                
+
                 {/* Card 4 */}
-                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 mt-8">
+                <div className="bg-white rounded-3xl p-6 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 cursor-pointer"
+                  onClick={() => navigate('/jobs')}
+                >
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse-glow">
                     <Shield className="w-8 h-8 text-white" />
                   </div>
@@ -228,7 +236,7 @@ const HomePage = () => {
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <div className="inline-block mb-6">
@@ -238,11 +246,11 @@ const HomePage = () => {
               About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Signavox</span> Technologies
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              We are a leading software company dedicated to delivering innovative technology 
+              We are a leading software company dedicated to delivering innovative technology
               solutions that drive business growth and success across various industries.
             </p>
           </div>
-          
+
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
             <div className="bg-white rounded-3xl p-8 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse-glow">
@@ -250,7 +258,7 @@ const HomePage = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our <span className="text-blue-600">Mission</span></h3>
               <p className="text-gray-600 leading-relaxed">
-                To assist businesses in navigating and thriving within a fast-paced technological 
+                To assist businesses in navigating and thriving within a fast-paced technological
                 environment by delivering high-quality services that empower our clients to remain competitive and secure.
               </p>
             </div>
@@ -261,7 +269,7 @@ const HomePage = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our <span className="text-green-600">Values</span></h3>
               <p className="text-gray-600 leading-relaxed">
-                We prioritize strong human connections, providing tailored support and guidance. 
+                We prioritize strong human connections, providing tailored support and guidance.
                 We build enduring partnerships that blend innovation with a personal approach.
               </p>
             </div>
@@ -272,7 +280,7 @@ const HomePage = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our <span className="text-purple-600">Vision</span></h3>
               <p className="text-gray-600 leading-relaxed">
-                To be the most trusted technology partner, helping businesses achieve sustained 
+                To be the most trusted technology partner, helping businesses achieve sustained
                 success in a constantly evolving tech landscape through innovation and excellence.
               </p>
             </div>
@@ -287,7 +295,7 @@ const HomePage = () => {
               <h4 className="font-bold text-gray-900 mb-2">Digital Transformation</h4>
               <p className="text-sm text-gray-600">Transform your online presence with innovative digital solutions</p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Cloud className="w-6 h-6 text-white" />
@@ -295,7 +303,7 @@ const HomePage = () => {
               <h4 className="font-bold text-gray-900 mb-2">Cloud Solutions</h4>
               <p className="text-sm text-gray-600">Scalable and secure cloud solutions for enhanced agility</p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Code className="w-6 h-6 text-white" />
@@ -303,7 +311,7 @@ const HomePage = () => {
               <h4 className="font-bold text-gray-900 mb-2">Engineering Solutions</h4>
               <p className="text-sm text-gray-600">Advanced engineering solutions tailored to industry demands</p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
               <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                 <Brain className="w-6 h-6 text-white" />
@@ -322,7 +330,7 @@ const HomePage = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-100/30 rounded-full blur-3xl"></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <div className="inline-block mb-6">
@@ -332,11 +340,11 @@ const HomePage = () => {
               Join Our <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Growing</span> Team
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-              We're seeking passionate and talented professionals to join our innovative team. 
+              We're seeking passionate and talented professionals to join our innovative team.
               Grow your career with us and be part of shaping the future of technology.
             </p>
           </div>
-          
+
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div className="space-y-8">
               <div className="space-y-6">
@@ -347,7 +355,7 @@ const HomePage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Java Developers</h3>
                     <p className="text-gray-600">
-                      We're looking for both frontend and backend Java developers to join our engineering team. 
+                      We're looking for both frontend and backend Java developers to join our engineering team.
                       Perfect for freshers and experienced candidates.
                     </p>
                   </div>
@@ -423,12 +431,12 @@ const HomePage = () => {
                   <p className="text-blue-200 text-sm">Java, Spring, Database, Web Technologies</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   startNavigation();
                   navigate('/jobs');
                 }}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                className="w-full mt-6 cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
               >
                 View All Positions
               </button>
@@ -451,20 +459,21 @@ const HomePage = () => {
             Ready to Join Our <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Team</span>?
           </h2>
           <p className="text-xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Take the next step in your career and be part of our innovative journey. 
+            Take the next step in your career and be part of our innovative journey.
             We're looking for passionate individuals who want to make a difference in the tech world.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <button 
-              onClick={() => scrollToSection('careers')}
-              className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+            <button
+              // onClick={() => scrollToSection('careers')}
+              onClick={() => navigate('/jobs')}
+              className="group px-12 cursor-pointer py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
             >
               Apply Now
               <ArrowRight className="inline-block ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
             {!isAuthenticated && (
-              <button 
+              <button
                 onClick={() => {
                   startNavigation();
                   navigate('/register');
@@ -474,7 +483,7 @@ const HomePage = () => {
                 Join Us
               </button>
             )}
-            <button 
+            <button
               onClick={() => scrollToSection('about')}
               className="px-12 py-6 border-2 border-white/30 text-white rounded-2xl font-semibold text-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
             >
@@ -491,7 +500,7 @@ const HomePage = () => {
               <h3 className="text-3xl font-bold mb-2">50+</h3>
               <p className="text-blue-200">Team Members</p>
             </div>
-            
+
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Globe className="w-8 h-8 text-white" />
@@ -499,7 +508,7 @@ const HomePage = () => {
               <h3 className="text-3xl font-bold mb-2">100+</h3>
               <p className="text-blue-200">Projects Delivered</p>
             </div>
-            
+
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Award className="w-8 h-8 text-white" />
@@ -513,7 +522,7 @@ const HomePage = () => {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-50">
-        <button 
+        <button
           onClick={() => scrollToSection('careers')}
           className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full transition-all duration-300 transform hover:scale-110 flex items-center justify-center group animate-pulse-glow"
         >

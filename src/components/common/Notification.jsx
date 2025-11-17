@@ -4,7 +4,7 @@ import { CheckCircle, AlertCircle, X, Info } from 'lucide-react';
 const Notification = ({ 
   type = 'info', 
   message, 
-  duration = 5000, 
+  duration = 3000, 
   onClose,
   isVisible = true 
 }) => {

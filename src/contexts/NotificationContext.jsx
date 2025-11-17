@@ -19,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
     const newNotification = {
       id,
       type: 'info',
-      duration: 5000,
+      duration: 3000,
       ...notification,
     };
     
@@ -31,19 +31,19 @@ export const NotificationProvider = ({ children }) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
 
-  const showSuccess = (message, duration = 5000) => {
+  const showSuccess = (message, duration = 3000) => {
     return addNotification({ type: 'success', message, duration });
   };
 
-  const showError = (message, duration = 5000) => {
+  const showError = (message, duration = 3000) => {
     return addNotification({ type: 'error', message, duration });
   };
 
-  const showWarning = (message, duration = 5000) => {
+  const showWarning = (message, duration = 3000) => {
     return addNotification({ type: 'warning', message, duration });
   };
 
-  const showInfo = (message, duration = 5000) => {
+  const showInfo = (message, duration = 3000) => {
     return addNotification({ type: 'info', message, duration });
   };
 

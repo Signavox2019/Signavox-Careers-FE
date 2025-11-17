@@ -187,8 +187,8 @@ const JobDetails = ({ job, onApply, isApplied, isAuthenticated, onApplicationSuc
             <span>Posted {getTimeSincePosted(currentJob.postedDate)}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-gray-400">•</span>
-            <span>{new Date(currentJob.postedDate).toLocaleDateString('en-US', { 
+            <span className="text-gray-400">Closing On:</span>
+            <span>{new Date(currentJob.closingDate).toLocaleDateString('en-US', { 
               weekday: 'short',
               month: 'short', 
               day: 'numeric',

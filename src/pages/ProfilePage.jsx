@@ -350,9 +350,9 @@ const ProfilePage = () => {
       )}
       <div className="max-w-7xl mx-auto">
         {/* MOBILE LAYOUT: stacked, no sidebar, horizontal tabs at top */}
-        <div className="block md:hidden bg-white rounded-lg shadow-sm min-h-[calc(100vh)]">
+        <div className="block md:hidden bg-white rounded-lg shadow-sm min-h-screen min-h-[100vh]">
           {/* Profile Top */}
-          <div className="flex flex-col items-center py-8 border-b border-gray-200 bg-purple-50">
+          <div className="flex flex-col items-center py-8 border-b border-gray-200 bg-purple-50 w-full">
             {profileData.profileImage ? (
               <img src={profileData.profileImage} alt="Profile" className="w-24 h-24 rounded-full object-cover mb-2" />
             ) : (
@@ -385,7 +385,7 @@ const ProfilePage = () => {
             ))}
           </div>
           {/* Tab Content */}
-          <div className="p-4 bg-gradient-to-br from-white to-gray-50 min-h-[calc(100vh-30vh)]">
+          <div className="p-4 bg-gradient-to-br from-white to-gray-50 min-h-[calc(100vh-14rem)]">
             {/* The following blocks should basically match the right column of the desktop layout but stacked */}
             {/* Only show details for selected tab - copy logic from below, adjust paddings etc for mobile readability */}
             {/* COPY TAB CONTENT FROM EXISTING - adjust grid to single-col when mobile */}

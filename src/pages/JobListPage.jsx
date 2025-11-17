@@ -281,6 +281,26 @@ const JobListPage = () => {
         {isMobile ? (
           <div className="h-[calc(100vh-120px)]">
             {mobileView === 'list' ? (
+              <>
+                {/* Filter/Search section - VISIBLE ON MOBILE LIST VIEW ONLY */}
+                <div className="bg-white px-4 pt-4 pb-2 border-b border-gray-200">
+                  <div className="mb-4">
+                    <SearchBar 
+                      value={searchQuery}
+                      onChange={setSearchQuery}
+                      placeholder="Search by job title, department, or skills..."
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-3 justify-start">
+                    <FilterDropdown label="Department" options={departments} value={departmentFilter} onChange={setDepartmentFilter} />
+                    <FilterDropdown label="Job Type" options={types} value={typeFilter} onChange={setTypeFilter} />
+                    <FilterDropdown label="Location" options={locations} value={locationFilter} onChange={setLocationFilter} />
+                  </div>
+                </div>
+                {/* End filter */}
+              </>
+            ) : null}
+            {mobileView === 'list' ? (
               <div className="bg-gradient-to-b from-gray-50 to-white flex flex-col h-full overflow-hidden border border-gray-200 shadow-sm">
                 {/* Tabs */}
                 <div className="flex border-b border-gray-200 bg-white">

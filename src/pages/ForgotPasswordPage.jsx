@@ -208,14 +208,14 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black">
+    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black">
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src={loginBG}
           alt="Forgot Password background"
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
-          style={{ minHeight: '100vh', minWidth: '100vw', filter: 'brightness(0.6) blur(1px)' }}
+          style={{ filter: 'brightness(0.6) blur(1px)' }}
         />
         {/* Creative overlay with branding gradients & effects */}
         <div className="absolute inset-0 z-10 pointer-events-none">
@@ -228,24 +228,24 @@ const ForgotPasswordPage = () => {
             }}
           />
           {/* Decorative floating shapes */}
-          <div className="absolute top-20 left-16 w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-blue-800 opacity-30 blur-2xl animate-pulse"></div>
-          <div className="absolute right-8 bottom-32 w-32 h-32 rounded-full bg-gradient-to-br from-fuchsia-800 to-purple-400 opacity-25 blur-3xl animate-bounce"></div>
-          <div className="absolute bottom-10 left-64 w-16 h-16 rounded-full bg-gradient-to-r from-cyan-600 to-sky-400 opacity-20 blur-lg animate-pulse"></div>
+          <div className="hidden sm:block absolute top-20 left-16 w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-blue-800 opacity-30 blur-2xl animate-pulse"></div>
+          <div className="hidden sm:block absolute right-8 bottom-32 w-32 h-32 rounded-full bg-gradient-to-br from-fuchsia-800 to-purple-400 opacity-25 blur-3xl animate-bounce"></div>
+          <div className="hidden sm:block absolute bottom-10 left-64 w-16 h-16 rounded-full bg-gradient-to-r from-cyan-600 to-sky-400 opacity-20 blur-lg animate-pulse"></div>
       </div>
       </div>
 
       <div className="relative w-full max-w-md z-20">
         {/* Forgot Password Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="hidden sm:flex w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mx-auto mb-6 shadow-lg">
               {step === 1 ? <Mail className="w-10 h-10 text-white" /> : <Shield className="w-10 h-10 text-white" />}
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               {step === 1 ? 'Forgot Password?' : 'Reset Password'}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {step === 1 
                 ? 'No worries! Enter your email and we\'ll send you an OTP.' 
                 : 'Enter the OTP sent to your email and create a new password.'
@@ -254,7 +254,7 @@ const ForgotPasswordPage = () => {
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex items-center justify-center mb-8">
+          <div className="hidden sm:flex items-center justify-center mb-6">
             <div className="flex items-center space-x-4">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                 step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
@@ -272,30 +272,30 @@ const ForgotPasswordPage = () => {
 
           {step === 1 ? (
             /* Step 1: Email Form */
-            <form onSubmit={handleSendOTP} className="space-y-6">
+            <form onSubmit={handleSendOTP} className="space-y-4 sm:space-y-5">
               {/* Email Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   </div>
                   <input
                     type="email"
                     name="email"
                     value={email}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                       errors.email ? 'border-red-400' : 'border-gray-200'
                     }`}
                     placeholder="Enter your email address"
                   />
                 </div>
                 {errors.email && (
-                  <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                    <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>{errors.email}</span>
                   </div>
                 )}
@@ -305,40 +305,40 @@ const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                     Sending OTP...
                   </div>
                 ) : (
                   <>
                     Send OTP
-                    <ArrowRight className="inline-block ml-2 w-5 h-5" />
+                    <ArrowRight className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </>
                 )}
               </button>
             </form>
           ) : (
             /* Step 2: OTP & Password Form */
-            <form onSubmit={handleResetPassword} className="space-y-6">
+            <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-5">
               {/* Email Display */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
                 <div className="flex items-center gap-2 text-blue-800">
                   <Mail className="w-4 h-4" />
-                  <span className="text-sm font-medium">OTP sent to: {email}</span>
+                  <span className="text-xs sm:text-sm font-medium">OTP sent to: {email}</span>
                 </div>
               </div>
 
               {/* OTP Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Verification Code
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Shield className="h-5 w-5 text-gray-400" />
+                    <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   </div>
                   <input
                     type="text"
@@ -346,20 +346,20 @@ const ForgotPasswordPage = () => {
                     value={otp}
                     onChange={handleInputChange}
                     maxLength="6"
-                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center text-lg tracking-widest ${
+                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center tracking-widest ${
                       errors.otp ? 'border-red-400' : 'border-gray-200'
                     }`}
                     placeholder="000000"
                   />
                 </div>
                 {errors.otp && (
-                  <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                    <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>{errors.otp}</span>
                   </div>
                 )}
                 {otpTimer > 0 && (
-                  <div className="mt-2 flex items-center gap-1 text-blue-600 text-sm">
+                  <div className="mt-1.5 flex items-center gap-1 text-blue-600 text-xs sm:text-sm">
                     <Clock className="w-4 h-4" />
                     <span>OTP expires in {formatTime(otpTimer)}</span>
                   </div>
@@ -368,19 +368,19 @@ const ForgotPasswordPage = () => {
 
               {/* New Password Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   New Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="newPassword"
                     value={newPassword}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-12 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                    className={`w-full pl-9 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                       errors.newPassword ? 'border-red-400' : 'border-gray-200'
                     }`}
                     placeholder="Enter new password"
@@ -390,12 +390,12 @@ const ForgotPasswordPage = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                 </div>
                 {errors.newPassword && (
-                  <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                    <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>{errors.newPassword}</span>
                   </div>
                 )}
@@ -403,19 +403,19 @@ const ForgotPasswordPage = () => {
 
               {/* Confirm Password Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Confirm Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   </div>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-12 py-3 bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                    className={`w-full pl-9 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 text-sm bg-gray-50 border rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                       errors.confirmPassword ? 'border-red-400' : 'border-gray-200'
                     }`}
                     placeholder="Confirm new password"
@@ -425,12 +425,12 @@ const ForgotPasswordPage = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <div className="mt-2 flex items-center gap-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
+                  <div className="mt-1.5 flex items-center gap-1 text-red-500 text-xs sm:text-sm">
+                    <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>{errors.confirmPassword}</span>
                   </div>
                 )}
@@ -440,17 +440,17 @@ const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={isLoading || otpTimer === 0}
-                className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                     Resetting Password...
             </div>
                 ) : (
                   <>
                     Reset Password
-                    <CheckCircle className="inline-block ml-2 w-5 h-5" />
+                    <CheckCircle className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </>
                 )}
               </button>
@@ -459,7 +459,7 @@ const ForgotPasswordPage = () => {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="w-full text-blue-600 hover:text-blue-700 font-medium py-2 transition-colors"
+                className="w-full text-blue-600 hover:text-blue-700 font-medium py-2 text-sm sm:text-base transition-colors"
               >
                 ← Back to Email
               </button>
@@ -467,8 +467,8 @@ const ForgotPasswordPage = () => {
           )}
 
           {/* Back to Login Link */}
-          <div className="text-center mt-8">
-            <p className="text-gray-600">
+          <div className="text-center mt-4 sm:mt-6">
+            <p className="text-xs sm:text-sm text-gray-600">
               Remember your password?{' '}
               <button 
                 onClick={() => {

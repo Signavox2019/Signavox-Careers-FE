@@ -1023,7 +1023,7 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Image - Career Growth Theme */}
-      <div className="absolute inset-0 opacity-15">
+      <div className="hidden sm:block absolute inset-0 opacity-15">
         <div 
           className="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
           style={{
@@ -1033,7 +1033,7 @@ const RegisterPage = () => {
       </div>
       
       {/* Overlay Pattern */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="hidden sm:block absolute inset-0 opacity-5">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
@@ -1047,22 +1047,22 @@ const RegisterPage = () => {
 
       <div className="relative w-full max-w-4xl">
         {/* Registration Card */}
-        <div className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
+        <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-2xl border border-gray-100 text-sm sm:text-base">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <div className="text-center mb-4 sm:mb-8">
+            <div className="hidden sm:flex w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mx-auto mb-6 shadow-lg">
               <Building2 className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               Join Our Team
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm sm:text-base">
               Create your <span className="text-blue-600 font-semibold">Signavox</span> account
             </p>
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8">
+          <div className="hidden sm:block mb-8">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-gray-600">Step {currentStep} of 3</span>
               <span className="text-sm text-gray-600">{getStepProgress()}% Complete</span>
@@ -1098,12 +1098,12 @@ const RegisterPage = () => {
             {currentStep === 3 && renderStep3()}
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-6 sm:mt-8">
             <button
               type="button"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="px-6 py-3 bg-gray-100 border border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 border border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -1112,26 +1112,26 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
                   Next
-                  <ArrowRight className="inline-block ml-2 w-5 h-5" />
+                  <ArrowRight className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Creating Account...
                     </div>
                   ) : (
                     <>
                       Create Account
-                      <ArrowRight className="inline-block ml-2 w-5 h-5" />
+                      <ArrowRight className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                     </>
                   )}
                 </button>
@@ -1140,8 +1140,8 @@ const RegisterPage = () => {
           </form>
 
           {/* Sign In Link */}
-          <div className="text-center mt-8">
-            <p className="text-gray-600">
+          <div className="text-center mt-4 sm:mt-8">
+            <p className="text-gray-600 text-sm">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
                 Sign in here

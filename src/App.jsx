@@ -6,6 +6,7 @@ import Layout from './components/common/Layout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import NavigationSpinner from './components/common/NavigationSpinner';
+import RouteChangeSpinner from './components/common/RouteChangeSpinner';
 import HomePage from './pages/HomePage';
 import JobListPage from './pages/JobListPage';
 import ProfilePage from './pages/ProfilePage';
@@ -20,6 +21,7 @@ function App() {
         <NotificationProvider>
           <NavigationProvider>
             <Router>
+            <RouteChangeSpinner />
             <Routes>
               {/* Authentication Routes - Protected from logged-in users */}
               <Route 
