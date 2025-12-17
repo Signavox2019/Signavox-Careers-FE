@@ -151,3 +151,17 @@ export const truncateText = (text, maxLength) => {
   return text.slice(0, maxLength) + '...';
 };
 
+/**
+ * Capitalize the first letter of each word in a location string
+ * @param {string} location - Raw location string
+ * @returns {string} Location with capitalized words
+ */
+export const formatLocation = (location = '') => {
+  if (!location) return '';
+  return location
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+

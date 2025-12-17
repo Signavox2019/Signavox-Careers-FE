@@ -1,4 +1,5 @@
 import { MapPin, Briefcase, Clock, CheckCircle, Calendar } from 'lucide-react';
+import { formatLocation } from '../../utils/helpers';
 
 const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
   // Calculate precise time since posted
@@ -68,7 +69,7 @@ const JobCard = ({ job, isSelected, onClick, isApplied = false }) => {
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin size={14} />
-              {job.location}
+              {formatLocation(job.location)}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock size={14} />

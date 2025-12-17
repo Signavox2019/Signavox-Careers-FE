@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { apiService } from '../api';
+import { formatLocation } from '../utils/helpers';
 import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
 import JobCard from '../components/job/JobCard';
@@ -18,7 +19,6 @@ const JobListPage = () => {
   const [locationFilter, setLocationFilter] = useState('');
   const [activeTab, setActiveTab] = useState('all'); // 'all' or 'applied'
   const [appliedJobIds, setAppliedJobIds] = useState([]);
-  const [showNotification, setShowNotification] = useState(false);
   const [showAuthRequired, setShowAuthRequired] = useState(false);
   const [authRedirecting, setAuthRedirecting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -27,9 +27,26 @@ const JobListPage = () => {
   const [selectedJobForApplication, setSelectedJobForApplication] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'list' | 'details'
+  const [jobDetailsTabs, setJobDetailsTabs] = useState({});
+  const [thankYouModal, setThankYouModal] = useState({
+    visible: false,
+    message: '',
+    application: null,
+  });
+  
+  // Ref to track selected job ID to preserve it when applications load
+  const selectedJobIdRef = useRef(null);
   
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const getAuthToken = () => localStorage.getItem('token') || localStorage.getItem('authToken');
+  
+  // Update ref whenever selectedJob changes
+  useEffect(() => {
+    if (selectedJob?._id) {
+      selectedJobIdRef.current = selectedJob._id;
+    }
+  }, [selectedJob]);
 
   // Get unique filter options from API data
   const departments = [...new Set(jobs.map(job => job.jobDescription?.category || 'Other'))];
@@ -60,7 +77,12 @@ const JobListPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await apiService.getJobs();
+        const token = getAuthToken();
+        if (!token) {
+          setError('Please log in to view available jobs.');
+          return;
+        }
+        const response = await apiService.getJobs(token);
         setJobs(response.jobs || []);
         if (response.jobs && response.jobs.length > 0) {
           setSelectedJob(response.jobs[0]);
@@ -74,7 +96,7 @@ const JobListPage = () => {
     };
 
     fetchJobs();
-  }, []);
+  }, [isAuthenticated]);
 
   // Load applied jobs from localStorage on component mount
   useEffect(() => {
@@ -134,10 +156,31 @@ const JobListPage = () => {
     setShowApplicationModal(true);
   };
 
-  const handleApplicationSuccess = (jobId) => {
-    setAppliedJobIds(prev => [...prev, jobId]);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
+  const currentDetailsTab = selectedJob ? (jobDetailsTabs[selectedJob._id] || 'summary') : 'summary';
+
+  const handleApplicationSuccess = (jobId, response) => {
+    setAppliedJobIds(prev => (prev.includes(jobId) ? prev : [...prev, jobId]));
+    setThankYouModal({
+      visible: true,
+      message: response?.message || 'Application submitted successfully!',
+      application: response?.application || null,
+    });
+  };
+
+  const closeThankYouModal = () => {
+    setThankYouModal({
+      visible: false,
+      message: '',
+      application: null,
+    });
+  };
+
+  const handleDetailsTabChange = (tabId) => {
+    if (!selectedJob?._id) return;
+    setJobDetailsTabs(prev => ({
+      ...prev,
+      [selectedJob._id]: tabId,
+    }));
   };
 
   // Filter jobs based on search and filters
@@ -165,10 +208,31 @@ const JobListPage = () => {
 
   // Update selected job when filters change
   useEffect(() => {
-    if (filteredJobs.length > 0 && !filteredJobs.includes(selectedJob)) {
+    if (filteredJobs.length === 0) {
+      if (selectedJob !== null) {
+        setSelectedJob(null);
+      }
+      return;
+    }
+
+    const currentSelectedId = selectedJob?._id;
+    const matchingJob = filteredJobs.find(job => job._id === currentSelectedId);
+
+    if (matchingJob) {
+      // Update to the matching job from filteredJobs to ensure it has the latest data
+      if (selectedJob !== matchingJob) {
+        setSelectedJob(matchingJob);
+      }
+      return;
+    }
+
+    // Only change selectedJob if there's no current selection or if current selection is invalid
+    // This preserves the selected job when applications load, even if it's not in filteredJobs
+    // (e.g., when on "applied" tab but the selected job hasn't been applied to yet)
+    if (!selectedJob || !jobs.find(job => job._id === currentSelectedId)) {
       setSelectedJob(filteredJobs[0]);
     }
-  }, [filteredJobs, selectedJob]);
+  }, [filteredJobs, selectedJob, jobs]);
 
   // Show loading state
   if (loading) {
@@ -203,14 +267,6 @@ const JobListPage = () => {
 
   return (
     <div className="min-h-screen bg-white relative">
-      {/* Success Notification */}
-      {showNotification && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in z-[10000]">
-          <CheckCircle size={20} />
-          <span className="font-medium">Application submitted successfully!</span>
-        </div>
-      )}
-      
       {/* Authentication Required Notification */}
       {showAuthRequired && (
         <div className="fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in z-[10000]">
@@ -270,6 +326,7 @@ const JobListPage = () => {
                 options={locations}
                 value={locationFilter}
                 onChange={setLocationFilter}
+                formatOption={formatLocation}
               />
             </div>
           </div>
@@ -294,7 +351,13 @@ const JobListPage = () => {
                   <div className="flex flex-wrap gap-3 justify-start">
                     <FilterDropdown label="Department" options={departments} value={departmentFilter} onChange={setDepartmentFilter} />
                     <FilterDropdown label="Job Type" options={types} value={typeFilter} onChange={setTypeFilter} />
-                    <FilterDropdown label="Location" options={locations} value={locationFilter} onChange={setLocationFilter} />
+                    <FilterDropdown 
+                      label="Location" 
+                      options={locations} 
+                      value={locationFilter} 
+                      onChange={setLocationFilter} 
+                      formatOption={formatLocation} 
+                    />
                   </div>
                 </div>
                 {/* End filter */}
@@ -380,6 +443,8 @@ const JobListPage = () => {
                     isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
                     isAuthenticated={isAuthenticated}
                     onApplicationSuccess={handleApplicationSuccess}
+                    activeTab={currentDetailsTab}
+                    onTabChange={handleDetailsTabChange}
                   />
                 </div>
               </div>
@@ -455,6 +520,8 @@ const JobListPage = () => {
                 isApplied={selectedJob ? appliedJobIds.includes(selectedJob._id) : false}
                 isAuthenticated={isAuthenticated}
                 onApplicationSuccess={handleApplicationSuccess}
+                activeTab={currentDetailsTab}
+                onTabChange={handleDetailsTabChange}
               />
             </div>
           </div>
@@ -468,6 +535,33 @@ const JobListPage = () => {
         job={selectedJobForApplication}
         onApplicationSuccess={handleApplicationSuccess}
       />
+
+      {thankYouModal.visible && (
+        <div className="fixed inset-0 z-[11000] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={closeThankYouModal} />
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-md w-full p-8 text-center space-y-4">
+            <div className="mx-auto w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900">Thank you for applying!</h3>
+            <p className="text-gray-600 text-sm">
+              {thankYouModal.message || 'We have received your application and will keep you updated.'}
+            </p>
+            {thankYouModal.application?.job?.title && (
+              <p className="text-sm text-gray-500">
+                Role: <span className="font-semibold text-gray-800">{thankYouModal.application.job.title}</span>
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={closeThankYouModal}
+              className="w-full mt-2 rounded-2xl bg-blue-600 text-white py-2.5 font-semibold hover:bg-blue-700 transition"
+            >
+              Continue browsing
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

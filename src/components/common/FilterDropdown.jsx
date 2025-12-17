@@ -1,7 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
-const FilterDropdown = ({ label, options, value, onChange }) => {
+const FilterDropdown = ({ label, options, value, onChange, formatOption = (option) => option }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -23,7 +23,7 @@ const FilterDropdown = ({ label, options, value, onChange }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm font-medium text-gray-700 truncate">
-          {value || label}
+          {value ? formatOption(value) : label}
         </span>
         <ChevronDown 
           size={18} 
@@ -51,7 +51,7 @@ const FilterDropdown = ({ label, options, value, onChange }) => {
                 setIsOpen(false);
               }}
             >
-              {option}
+              {formatOption(option)}
             </button>
           ))}
         </div>

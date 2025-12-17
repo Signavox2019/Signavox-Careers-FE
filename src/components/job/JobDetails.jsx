@@ -4,9 +4,27 @@ import {
   Calendar, CheckCircle, ArrowRight, Loader2, AlertCircle 
 } from 'lucide-react';
 import { apiService } from '../../api';
+import { formatLocation } from '../../utils/helpers';
 
-const JobDetails = ({ job, onApply, isApplied, isAuthenticated, onApplicationSuccess }) => {
-  const [activeTab, setActiveTab] = useState('summary');
+const JobDetails = ({
+  job,
+  onApply,
+  isApplied,
+  isAuthenticated,
+  onApplicationSuccess,
+  activeTab: controlledActiveTab,
+  onTabChange,
+}) => {
+  const [localActiveTab, setLocalActiveTab] = useState('summary');
+  const activeTab = controlledActiveTab ?? localActiveTab;
+
+  const handleTabChange = (tabId) => {
+    if (onTabChange) {
+      onTabChange(tabId);
+    } else {
+      setLocalActiveTab(tabId);
+    }
+  };
   const [detailedJob, setDetailedJob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +42,13 @@ const JobDetails = ({ job, onApply, isApplied, isAuthenticated, onApplicationSuc
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.getJobById(jobId);
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      if (!token) {
+        setError('Please log in to view job details.');
+        setDetailedJob(job);
+        return;
+      }
+      const response = await apiService.getJobById(jobId, token);
       setDetailedJob(response);
     } catch (err) {
       console.error('Error fetching detailed job:', err);
@@ -169,7 +193,7 @@ const JobDetails = ({ job, onApply, isApplied, isAuthenticated, onApplicationSuc
           </div>
           <div className="flex items-center gap-1.5 text-xs text-gray-600">
             <MapPin size={14} />
-            <span>{currentJob.location}</span>
+            <span>{formatLocation(currentJob.location)}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-gray-600">
             <Clock size={14} />
@@ -201,17 +225,17 @@ const JobDetails = ({ job, onApply, isApplied, isAuthenticated, onApplicationSuc
       {/* Tabs */}
       <div className="flex border-b border-gray-200 bg-white">
         {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === tab.id 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
+            <button
+              key={tab.id}
+              className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                activeTab === tab.id 
+                  ? 'border-blue-600 text-blue-600' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+              onClick={() => handleTabChange(tab.id)}
+            >
+              {tab.label}
+            </button>
         ))}
       </div>
 
