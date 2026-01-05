@@ -1,5 +1,5 @@
-// const baseUrl = 'http://localhost:5000/api';  
-const baseUrl = 'https://signavox-careers.onrender.com/api';  
+const baseUrl = 'http://localhost:5000/api';  
+// const baseUrl = 'https://signavox-careers.onrender.com/api';  
 
 // API endpoints
 export const API_ENDPOINTS = {
