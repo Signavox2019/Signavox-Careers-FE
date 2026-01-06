@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { apiService } from '../api';
 
 const AuthContext = createContext();
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Function to validate token - returns structured result without throwing
-  const validateToken = async (token) => {
+  const validateToken = useCallback(async (token) => {
     try {
       const response = await apiService.validateToken(token);
       if (response?.message === 'Invalid or expired token') {
@@ -32,10 +32,10 @@ export const AuthProvider = ({ children }) => {
       // Do NOT force logout on transient/network errors; let caller decide
       return { valid: false, message: 'Validation request failed' };
     }
-  };
+  }, []);
 
   // Function to clear authentication data
-  const clearAuthData = () => {
+  const clearAuthData = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     localStorage.removeItem('appliedJobs');
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
     // localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
-  };
+  }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Function to manually validate token (can be called when needed)
-  const checkTokenValidity = async () => {
+  const checkTokenValidity = useCallback(async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     
     if (!token) {
@@ -140,7 +140,16 @@ export const AuthProvider = ({ children }) => {
       // On unexpected error, keep session and report false to caller
       return true;
     }
-  };
+  }, [clearAuthData, validateToken]);
+
+  // Periodically re-validate token every 15 minutes
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkTokenValidity();
+    }, 15 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [checkTokenValidity]);
 
   const value = useMemo(() => ({
     user,
