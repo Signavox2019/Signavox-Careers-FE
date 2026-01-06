@@ -305,6 +305,28 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../assets/lib/api";
 
+const STAGE_ORDER = [
+    "applied",
+    "resume_shortlisted",
+    "screening_test",
+    "group_discussion",
+    "technical_interview",
+    "manager_interview",
+    "hr_interview",
+    "selected",
+    "offered",
+    "rejected",
+    "hired",
+];
+
+const formatLabel = (value) =>
+    value
+        ? value
+              .toString()
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase())
+        : "—";
+
 export default function ManageApplicants() {
     const { id } = useParams(); // job id
     const navigate = useNavigate();
@@ -393,22 +415,42 @@ export default function ManageApplicants() {
                                 "Unknown";
                             const email = app.candidate?.email || app.candidateEmail || "—";
 
-                            const currentStage =
-                                app.stage ||
-                                app.stageWiseStatus?.find((s) => s.status === "in_review")?.stageName ||
-                                "applied";
+            const customStages = (workflow.length ? workflow.map((s) => s.stage) : []).filter(Boolean);
 
-                            const currentIndex = workflow.findIndex(
-                                (stg) =>
-                                    stg.stage?.toLowerCase() === currentStage.toLowerCase()
-                            );
+            // Order stages according to STAGE_ORDER and append any unknowns at the end
+            const orderedStages = [
+                ...STAGE_ORDER.filter((stage) =>
+                    customStages.some((s) => s?.toLowerCase() === stage)
+                ),
+                ...customStages.filter(
+                    (s) => !STAGE_ORDER.includes(s?.toLowerCase?.())
+                ),
+            ];
 
-                            const isFinalStage = currentIndex === workflow.length - 1;
-                            const nextStage = workflow[currentIndex + 1];
+            const stagesSource = orderedStages.length ? orderedStages : STAGE_ORDER;
+
+            const currentStageRaw =
+                app.stage ||
+                app.stageWiseStatus?.find((s) => s.status === "in_review")
+                    ?.stageName ||
+                stagesSource[0] ||
+                "applied";
+
+            const currentStage = currentStageRaw.toLowerCase();
+
+            const currentIndex = Math.max(
+                0,
+                stagesSource.findIndex(
+                    (s) => s?.toLowerCase() === currentStage
+                )
+            );
+
+            const isFinalStage = currentIndex === stagesSource.length - 1;
+            const nextStageCode = stagesSource[currentIndex + 1];
 
                             const nextButtonLabel = isFinalStage
                                 ? "Generate Offer Letter"
-                                : `Move to ${nextStage?.stage || "Next Stage"}`;
+                : `Move to ${formatLabel(nextStageCode) || "Next Stage"}`;
 
                             return (
                                 <li
@@ -427,7 +469,7 @@ export default function ManageApplicants() {
                                         <div className="text-sm text-gray-600 mt-1">
                                             Current Stage:{" "}
                                             <span className="font-medium capitalize">
-                                                {currentStage}
+                                                {formatLabel(currentStage)}
                                             </span>
                                         </div>
                                         {app.stage === "rejected" && (
@@ -466,9 +508,11 @@ export default function ManageApplicants() {
                                                         )
                                                         : updateStatus(
                                                             app._id,
-                                                            nextStage?.stage,
+                                                            nextStageCode,
                                                             "accept",
-                                                            `Moved to next stage: ${nextStage?.stage}`
+                                                            `Moved to next stage: ${formatLabel(
+                                                                nextStageCode
+                                                            )}`
                                                         )
                                                 }
                                                 className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"

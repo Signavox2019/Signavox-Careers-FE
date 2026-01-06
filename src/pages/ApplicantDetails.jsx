@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../assets/lib/api";
 
+const formatLabel = (value) =>
+  value
+    ? value
+        .toString()
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+    : "—";
+
 export default function ApplicantDetails() {
   const { userId } = useParams(); // from /admin/jobs/:id/applicants/:userId
   const nav = useNavigate();
@@ -29,7 +37,7 @@ export default function ApplicantDetails() {
   if (!user) return <div className="p-8 text-red-600">Applicant not found</div>;
 
   return (
-    <div className="w-full px-8 py-6">
+    <div className="w-full px-4 md:px-8 py-6">
       <button
         onClick={() => nav(-1)}
         className="mb-4 px-4 py-2 border rounded-md hover:bg-gray-100"
@@ -45,7 +53,7 @@ export default function ApplicantDetails() {
             className="w-32 h-32 rounded-full object-cover mb-3 border"
           />
           <h2 className="text-xl font-bold text-gray-800 mb-1">{user.name}</h2>
-          <p className="text-gray-600 mb-1">{user.role?.toUpperCase()}</p>
+          <p className="text-gray-600 mb-1">{formatLabel(user.role)}</p>
           <p className="text-gray-500 mb-2">{user.email}</p>
           <a
             href={user.resume}
@@ -123,49 +131,26 @@ export default function ApplicantDetails() {
           <div className="bg-white shadow-md rounded-2xl p-6 mb-6">
             <h3 className="text-2xl font-bold mb-6 text-gray-800">Education</h3>
             <div className="overflow-x-auto">
-              <table className="min-w-full border-separate border-spacing-y-2">
-                <thead>
+              <table className="min-w-full border-collapse text-left">
+                <thead className="bg-gray-50 text-gray-700">
                   <tr>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      Degree
-                    </th>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      Institution
-                    </th>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      Board/University
-                    </th>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      Year
-                    </th>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      CGPA / %
-                    </th>
-                    <th className="text-lg font-semibold text-left pb-2 px-4">
-                      Specialization
-                    </th>
+                    <th className="px-4 py-3 text-sm font-semibold">Degree</th>
+                    <th className="px-4 py-3 text-sm font-semibold">Institution</th>
+                    <th className="px-4 py-3 text-sm font-semibold">Board / University</th>
+                    <th className="px-4 py-3 text-sm font-semibold text-center">Year</th>
+                    <th className="px-4 py-3 text-sm font-semibold text-center">CGPA / %</th>
+                    <th className="px-4 py-3 text-sm font-semibold">Specialization</th>
                   </tr>
                 </thead>
-                <tbody className="text-lg">
+                <tbody className="divide-y divide-gray-200 text-sm text-gray-800">
                   {user.education.map((edu, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b-2 border-gray-200 last:border-none"
-                    >
-                      <td className="px-4 py-2">
-                        {edu.programOrDegree || "—"}
-                      </td>
-                      <td className="px-4 py-2">{edu.institution || "—"}</td>
-                      <td className="px-4 py-2">
-                        {edu.boardOrUniversity || "—"}
-                      </td>
-                      <td className="px-4 py-2">{edu.passedYear || "—"}</td>
-                      <td className="px-4 py-2">
-                        {edu.percentageOrCGPA || "—"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {edu.branchOrSpecialization || "—"}
-                      </td>
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">{formatLabel(edu.programOrDegree)}</td>
+                      <td className="px-4 py-3">{formatLabel(edu.institution)}</td>
+                      <td className="px-4 py-3">{formatLabel(edu.boardOrUniversity)}</td>
+                      <td className="px-4 py-3 text-center">{formatLabel(edu.passedYear)}</td>
+                      <td className="px-4 py-3 text-center">{formatLabel(edu.percentageOrCGPA)}</td>
+                      <td className="px-4 py-3">{formatLabel(edu.branchOrSpecialization)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -192,7 +177,7 @@ export default function ApplicantDetails() {
                     key={idx}
                     className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs"
                   >
-                    {skill}
+                    {formatLabel(skill)}
                   </span>
                 ))}
               </div>
@@ -207,23 +192,28 @@ export default function ApplicantDetails() {
               Certifications
             </h3>
             {user.certifications && user.certifications.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {user.certifications.map((cert, idx) => (
-                  <li key={idx} className="border-b last:border-none pb-2">
-                    <div className="font-medium">{cert.certificationName}</div>
-                    <div className="text-gray-500 text-xs mb-1">
-                      {cert.issuedBy} •{" "}
-                      {cert.issuedDate
-                        ? new Date(cert.issuedDate).toLocaleDateString()
-                        : ""}
-                      {cert.expiryDate
-                        ? ` - Expiry: ${new Date(
-                            cert.expiryDate
-                          ).toLocaleDateString()}`
-                        : ""}
+                  <li
+                    key={idx}
+                    className="border rounded-lg p-3 bg-gray-50 hover:bg-white transition"
+                  >
+                    <div className="font-semibold text-gray-800">
+                      {formatLabel(cert.certificationName)}
                     </div>
-                    <div className="text-gray-600 text-sm">
-                      {cert.description}
+                    <div className="text-gray-600 text-xs mb-1 flex flex-wrap gap-2">
+                      <span>{formatLabel(cert.issuedBy)}</span>
+                      {cert.issuedDate && (
+                        <span>• {new Date(cert.issuedDate).toLocaleDateString()}</span>
+                      )}
+                      {cert.expiryDate && (
+                        <span>
+                          • Expiry: {new Date(cert.expiryDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-gray-700 text-sm">
+                      {formatLabel(cert.description)}
                     </div>
                     {cert.certificateUrl && (
                       <a

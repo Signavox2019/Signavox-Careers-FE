@@ -116,12 +116,53 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../assets/lib/api';
 
+const formatLabel = (value) =>
+  value
+    ? value
+        .toString()
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+    : '—';
+
+const capitalize = (str) =>
+  str
+    ? str
+        .toString()
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+
+const formatName = (user) => {
+  if (!user) return 'Unassigned';
+  const full = [user.firstName, user.middleName, user.lastName]
+    .filter(Boolean)
+    .map(capitalize)
+    .join(' ')
+    .trim();
+
+  // Handle cases where backend only returns `name` or a plain string
+  if (full) return full;
+  if (typeof user === 'string') return capitalize(user);
+  if (user.name) return formatLabel(user.name);
+
+  return 'Unassigned';
+};
+
 export default function JobDetails() {
   const { id } = useParams();
   const nav = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+
+  const applicantsCount = job?.applicants?.length ?? 0;
+  const statusLabel = job ? formatLabel(job.status) : '—';
+  const locationLabel = job?.location || 'Not specified';
+  const typeLabel = formatLabel(job?.type);
+  const expLabel = job?.experience || 'Any experience';
+  const shiftLabel = formatLabel(job?.jobDescription?.shift);
+  const openingsLabel =
+    job?.jobDescription?.openings != null ? job.jobDescription.openings : '—';
 
   const load = async () => {
     try {
@@ -214,13 +255,28 @@ const handleToggleStatus = async () => {
   if (!job) return <div className="p-6">Job not found</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header Section */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{job.title}</h1>
-          <div className="text-sm text-gray-500">
-            {job.location} • {job.type} • {job.experience || 'Any'}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            {job.title}
+          </h1>
+          <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+              📍 {locationLabel}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+              🧭 {typeLabel}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+              🎯 {expLabel}
+            </span>
+            {job.closingDate && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-100">
+                📅 Closes: {new Date(job.closingDate).toLocaleDateString()}
+              </span>
+            )}
           </div>
         </div>
 
@@ -261,87 +317,155 @@ const handleToggleStatus = async () => {
       </div>
 
       {/* Main Job Details */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Overview */}
-        <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow">
-          <h3 className="font-semibold text-lg mb-2">Overview</h3>
-          <p className="text-gray-700 whitespace-pre-wrap">
-            {job.jobDescription?.overview ||
-              job.jobDescription?.aboutRole ||
-              '—'}
-          </p>
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Overview + Lists */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-semibold text-lg text-gray-900">Overview</h3>
+              {job.jobDescription?.category && (
+                <span className="text-sm text-gray-500">
+                  Category: <span className="font-medium text-gray-700">{formatLabel(job.jobDescription.category)}</span>
+                </span>
+              )}
+            </div>
+            <p className="text-gray-700 whitespace-pre-wrap mt-2">
+              {job.jobDescription?.overview ||
+                job.jobDescription?.aboutRole ||
+                '—'}
+            </p>
+          </div>
 
-          <div className="mt-6 grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             {/* Responsibilities */}
-            <div>
-              <h4 className="text-sm font-medium mb-1">Responsibilities</h4>
-              <ul className="list-disc ml-5 text-gray-700">
-                {(job.jobDescription?.responsibilities || []).map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h4 className="text-sm font-semibold mb-2 text-gray-800">
+                Responsibilities
+              </h4>
+              {(job.jobDescription?.responsibilities?.length ?? 0) > 0 ? (
+                <ul className="list-disc ml-4 space-y-1 text-gray-700 text-sm">
+                  {job.jobDescription.responsibilities.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">Not provided.</p>
+              )}
             </div>
 
             {/* Requirements */}
-            <div>
-              <h4 className="text-sm font-medium mb-1">Requirements</h4>
-              <ul className="list-disc ml-5 text-gray-700">
-                {(job.jobDescription?.requirements || []).map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h4 className="text-sm font-semibold mb-2 text-gray-800">
+                Requirements
+              </h4>
+              {(job.jobDescription?.requirements?.length ?? 0) > 0 ? (
+                <ul className="list-disc ml-4 space-y-1 text-gray-700 text-sm">
+                  {job.jobDescription.requirements.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">Not provided.</p>
+              )}
             </div>
 
             {/* Benefits */}
-            <div>
-              <h4 className="text-sm font-medium mb-1">Benefits</h4>
-              <ul className="list-disc ml-5 text-gray-700">
-                {(job.jobDescription?.benefits || []).map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h4 className="text-sm font-semibold mb-2 text-gray-800">
+                Benefits
+              </h4>
+              {(job.jobDescription?.benefits?.length ?? 0) > 0 ? (
+                <ul className="list-disc ml-4 space-y-1 text-gray-700 text-sm">
+                  {job.jobDescription.benefits.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">Not provided.</p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Sidebar */}
-        <aside className="bg-white p-6 rounded-2xl shadow space-y-4">
-          {/* Assigned To */}
-          <div>
-            <h4 className="text-sm text-gray-500 mb-1">Assigned To</h4>
-            <div className="flex items-center justify-between">
-              <div>{job.assignedTo?.firstName + ' ' + job.assignedTo?.lastName || 'Unassigned'}</div>
+        <aside className="space-y-4">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white p-4 rounded-2xl shadow">
+              <p className="text-xs text-gray-500 mb-1">Assigned To</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {formatName(job.assignedTo)}
+              </p>
             </div>
-          </div>
-
-          {/* Job Status */}
-          <div>
-            <h4 className="text-sm text-gray-500 mb-1">Job Status</h4>
-            <div className="mt-2">
+            <div className="bg-white p-4 rounded-2xl shadow">
+              <p className="text-xs text-gray-500 mb-1">Status</p>
               <span
-                className={`px-3 py-1 rounded-full text-sm ${
+                className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                   job.status === 'open'
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
-                {job.status === 'open' ? 'Open' : 'Closed'}
+                {statusLabel}
               </span>
+            </div>
+            <div className="bg-white p-4 rounded-2xl shadow">
+              <p className="text-xs text-gray-500 mb-1">Applicants</p>
+              <p className="text-lg font-semibold text-gray-800">{applicantsCount}</p>
+            </div>
+            <div className="bg-white p-4 rounded-2xl shadow">
+              <p className="text-xs text-gray-500 mb-1">Openings</p>
+              <p className="text-lg font-semibold text-gray-800">{openingsLabel}</p>
             </div>
           </div>
 
-          {/* Applicants */}
-          <div>
-            <h4 className="text-sm text-gray-500 mb-1">Applicants</h4>
-            <div className="mt-2 text-lg font-semibold">
-              {job.applicants?.length ?? 0}
+          {/* Job Basics */}
+          <div className="bg-white p-5 rounded-2xl shadow space-y-3">
+            <h4 className="text-sm font-semibold text-gray-800">Job Basics</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm text-gray-700">
+              <div>
+                <p className="text-xs text-gray-500">Type</p>
+                <p className="font-medium">{typeLabel}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Location</p>
+                <p className="font-medium">{locationLabel}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Experience</p>
+                <p className="font-medium">{expLabel}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Shift</p>
+                <p className="font-medium">{shiftLabel || '—'}</p>
+              </div>
+              {job.jobDescription?.ctc && (
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">CTC Range</p>
+                  <p className="font-medium">
+                    {job.jobDescription.ctc.min || '—'} - {job.jobDescription.ctc.max || '—'}
+                  </p>
+                </div>
+              )}
             </div>
-            <Link
-              to={`/admin/jobs/${id}/applicants`}
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Manage applicants
-            </Link>
+          </div>
+
+          {/* Applicants Link */}
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500">Applicants</p>
+                <p className="text-base font-semibold text-gray-800">
+                  {applicantsCount}
+                </p>
+              </div>
+              <Link
+                to={`/admin/jobs/${id}/applicants`}
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                Manage
+              </Link>
+            </div>
           </div>
         </aside>
       </div>

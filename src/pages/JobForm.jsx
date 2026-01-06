@@ -140,6 +140,20 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Trash2, Plus, File, Calendar, Users, X } from "lucide-react";
 import api from "../assets/lib/api";
 
+const HIRING_STAGE_OPTIONS = [
+  "applied",
+  "resume_shortlisted",
+  "screening_test",
+  "group_discussion",
+  "technical_interview",
+  "manager_interview",
+  "hr_interview",
+  "selected",
+  "offered",
+  "rejected",
+  "hired",
+];
+
 export default function JobForm() {
   const { id } = useParams(); // if id exists -> edit
   const navigate = useNavigate();
@@ -505,7 +519,7 @@ const onSubmit = async (data) => {
                   <label className="block text-sm font-medium text-gray-700">Job Title</label>
                   <input
                     {...register("title", { required: true })}
-                    placeholder="Backend Engineer"
+                    placeholder="e.g., Senior Software Engineer"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
@@ -514,7 +528,7 @@ const onSubmit = async (data) => {
                   <label className="block text-sm font-medium text-gray-700">Location</label>
                   <input
                     {...register("location", { required: true })}
-                    placeholder="Chennai"
+                    placeholder="e.g., Bengaluru, India (Hybrid)"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
@@ -537,7 +551,7 @@ const onSubmit = async (data) => {
                   <label className="block text-sm font-medium text-gray-700">Experience</label>
                   <input
                     {...register("experience")}
-                    placeholder="e.g., 2-5 years"
+                    placeholder="e.g., 3-5 years of experience"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
@@ -614,7 +628,7 @@ const onSubmit = async (data) => {
                   <label className="text-sm text-gray-600">Category</label>
                   <input
                     {...register("jobDescription.category")}
-                    placeholder="Engineering"
+                    placeholder="e.g., Engineering / Platform"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -654,7 +668,7 @@ const onSubmit = async (data) => {
                   <label className="text-sm text-gray-600">CTC - Min</label>
                   <input
                     {...register("jobDescription.ctc.min")}
-                    placeholder="8 LPA"
+                    placeholder="e.g., 8,00,000"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -663,7 +677,7 @@ const onSubmit = async (data) => {
                   <label className="text-sm text-gray-600">CTC - Max</label>
                   <input
                     {...register("jobDescription.ctc.max")}
-                    placeholder="12 LPA"
+                    placeholder="e.g., 12,00,000"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -673,7 +687,7 @@ const onSubmit = async (data) => {
                   <textarea
                     {...register("jobDescription.aboutRole")}
                     rows={3}
-                    placeholder="Responsible for building scalable APIs..."
+                    placeholder="Summarize mission, impact, and team context"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -698,7 +712,7 @@ const onSubmit = async (data) => {
                       <div key={field.id} className="flex gap-2">
                         <input
                           {...register(`jobDescription.responsibilities.${idx}`)}
-                          placeholder={`Responsibility #${idx + 1}`}
+                          placeholder={`Primary responsibility #${idx + 1}`}
                           className="flex-1 block w-full border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button
@@ -731,7 +745,7 @@ const onSubmit = async (data) => {
                       <div key={field.id} className="flex gap-2">
                         <input
                           {...register(`jobDescription.requirements.${idx}`)}
-                          placeholder={`Requirement #${idx + 1}`}
+                          placeholder={`Mandatory requirement #${idx + 1}`}
                           className="flex-1 block w-full border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button
@@ -763,7 +777,7 @@ const onSubmit = async (data) => {
                       <div key={field.id} className="flex gap-2">
                         <input
                           {...register(`jobDescription.benefits.${idx}`)}
-                          placeholder={`Benefit #${idx + 1}`}
+                          placeholder={`Benefit or perk #${idx + 1}`}
                           className="flex-1 block w-full border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button
@@ -788,7 +802,7 @@ const onSubmit = async (data) => {
                     <textarea
                       {...register("jobDescription.summary.overview")}
                       rows={3}
-                      placeholder="We are hiring for our backend team..."
+                      placeholder="Concise elevator pitch for this role"
                       className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                     />
                   </div>
@@ -800,7 +814,7 @@ const onSubmit = async (data) => {
                         <div className="flex gap-2" key={f.id}>
                           <input
                             {...register(`jobDescription.summary.responsibilities.${idx}`)}
-                            placeholder={`Summary responsibility #${idx + 1}`}
+                            placeholder={`Key summary responsibility #${idx + 1}`}
                             className="flex-1 block w-full border border-gray-200 rounded-lg px-3 py-2"
                           />
                           <button
@@ -829,7 +843,7 @@ const onSubmit = async (data) => {
                         <div className="flex gap-2" key={f.id}>
                           <input
                             {...register(`jobDescription.summary.qualifications.${idx}`)}
-                            placeholder={`Qualification #${idx + 1}`}
+                            placeholder={`Qualification highlight #${idx + 1}`}
                             className="flex-1 block w-full border border-gray-200 rounded-lg px-3 py-2"
                           />
                           <button
@@ -870,14 +884,22 @@ const onSubmit = async (data) => {
               <div className="mt-4 space-y-3">
                 {stagesFA.fields.map((field, idx) => (
                   <div key={field.id} className="grid md:grid-cols-3 gap-3 items-start">
-                    <input
+                    <select
                       {...register(`hiringWorkflow.stages.${idx}.stage`)}
-                      placeholder={`Stage #${idx + 1} (e.g., Screening)`}
                       className="col-span-1 border border-gray-200 rounded-lg px-3 py-2"
-                    />
+                    >
+                      <option value="">Select stage</option>
+                      {HIRING_STAGE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (c) => c.toUpperCase())}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       {...register(`hiringWorkflow.stages.${idx}.description`)}
-                      placeholder="Short description"
+                      placeholder="e.g., 30-min phone screen with hiring manager"
                       className="col-span-1 md:col-span-1 border border-gray-200 rounded-lg px-3 py-2"
                     />
                     <div className="flex items-center gap-2">
@@ -907,7 +929,7 @@ const onSubmit = async (data) => {
                       <div className="flex gap-2" key={f.id}>
                         <input
                           {...register(`eligibilityCriteria.required.${idx}`)}
-                          placeholder={`Required #${idx + 1}`}
+                          placeholder={`Must-have criterion #${idx + 1}`}
                           className="flex-1 border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button
@@ -936,7 +958,7 @@ const onSubmit = async (data) => {
                       <div className="flex gap-2" key={f.id}>
                         <input
                           {...register(`eligibilityCriteria.preferred.${idx}`)}
-                          placeholder={`Preferred #${idx + 1}`}
+                          placeholder={`Nice-to-have criterion #${idx + 1}`}
                           className="flex-1 border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button
@@ -965,7 +987,7 @@ const onSubmit = async (data) => {
                       <div className="flex gap-2" key={f.id}>
                         <input
                           {...register(`eligibilityCriteria.skills.${idx}`)}
-                          placeholder={`Skill #${idx + 1}`}
+                          placeholder={`Skill or tool #${idx + 1}`}
                           className="flex-1 border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <button

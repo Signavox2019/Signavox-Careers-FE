@@ -335,7 +335,14 @@
 
 import { useEffect, useState } from "react";
 import api from "../assets/lib/api";
-import { Award, Users, CheckCircle, Filter } from "lucide-react";
+import {
+  Award,
+  Users,
+  CheckCircle,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const StatCard = ({ icon, label, value, accent }) => (
@@ -352,11 +359,31 @@ const StatCard = ({ icon, label, value, accent }) => (
   </div>
 );
 
+const formatLabel = (value) =>
+  value
+    ? value
+        .toString()
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+    : "—";
+
+const capitalizeWords = (value) =>
+  value
+    ? value
+        .toString()
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+    : "—";
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage, setRecordsPerPage] = useState(10);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -409,7 +436,13 @@ export default function AdminDashboard() {
     }
 
     setFilteredJobs(result);
+    setCurrentPage(1); // reset when filters change
   }, [filters, jobs]);
+
+  // Reset to first page if page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [recordsPerPage]);
 
   useEffect(() => {
     load();
@@ -420,6 +453,14 @@ export default function AdminDashboard() {
     ...new Set(jobs.map((j) => j.assignedTo?.name).filter(Boolean)),
   ];
   const statusOptions = [...new Set(jobs.map((j) => j.status).filter(Boolean))];
+
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / recordsPerPage));
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
+  const startRecord = filteredJobs.length ? startIndex + 1 : 0;
+  const endRecord = Math.min(endIndex, filteredJobs.length);
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
@@ -540,22 +581,26 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredJobs.length > 0 ? (
-                  filteredJobs.slice(0, 10).map((job, index) => (
+                {paginatedJobs.length > 0 ? (
+                  paginatedJobs.map((job, index) => (
                     <tr
                       key={job._id}
                       className="border-t hover:bg-gray-50 transition-all"
                     >
                       <td className="p-3 text-gray-700 font-medium">
-                        {index + 1}
+                        {startIndex + index + 1}
                       </td>
                       <td className="p-3 text-gray-800 font-medium">
-                        {job.title}
+                        {capitalizeWords(job.title)}
                       </td>
-                      <td className="p-3 text-gray-600">{job.location}</td>
-                      <td className="p-3 text-gray-600">{job.type}</td>
                       <td className="p-3 text-gray-600">
-                        {job.assignedTo?.name || "—"}
+                        {capitalizeWords(job.location)}
+                      </td>
+                      <td className="p-3 text-gray-600">
+                        {capitalizeWords(job.type)}
+                      </td>
+                      <td className="p-3 text-gray-600">
+                        {capitalizeWords(job.assignedTo?.name)}
                       </td>
                       <td className="p-3 text-gray-600">
                         {job.applicants?.length || 0}
@@ -570,7 +615,7 @@ export default function AdminDashboard() {
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {job.status}
+                          {formatLabel(job.status)}
                         </span>
                       </td>
                       <td className="p-3">
@@ -595,6 +640,68 @@ export default function AdminDashboard() {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination + page size */}
+        {!loading && (
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <span>Rows per page:</span>
+              <select
+                value={recordsPerPage}
+                onChange={(e) => setRecordsPerPage(Number(e.target.value))}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+
+            {filteredJobs.length > 0 ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Prev</span>
+                </button>
+
+                <span className="text-sm text-gray-700 font-semibold">
+                  {startRecord}-{endRecord} of {filteredJobs.length}
+                </span>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(totalPages, prev + 1)
+                    )
+                  }
+                  disabled={currentPage === totalPages || !filteredJobs.length}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    currentPage === totalPages || !filteredJobs.length
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500">No jobs to paginate.</div>
+            )}
           </div>
         )}
       </section>
