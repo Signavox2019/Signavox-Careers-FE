@@ -115,6 +115,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../assets/lib/api';
+import { showError, showSuccess, showConfirm } from '../utils/notify';
 
 const formatLabel = (value) =>
   value
@@ -148,6 +149,13 @@ const formatName = (user) => {
   return 'Unassigned';
 };
 
+const formatINR = (value) => {
+  if (!value || value === '—') return '—';
+  const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.]/g, '')) : value;
+  if (isNaN(num)) return value;
+  return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+};
+
 export default function JobDetails() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -171,7 +179,7 @@ export default function JobDetails() {
       setJob(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to load job');
+      showError('Failed to load job');
     } finally {
       setLoading(false);
     }
@@ -203,11 +211,15 @@ const handleToggleStatus = async () => {
   if (!job) return;
 
   const isClosing = job.status === 'open';
-  const confirmMsg = isClosing
-    ? 'Are you sure you want to close this job?'
-    : 'Are you sure you want to reopen this job?';
+  const confirmTitle = isClosing
+    ? 'Close this job?'
+    : 'Reopen this job?';
+  const confirmText = isClosing
+    ? 'Are you sure you want to close this job posting?'
+    : 'Are you sure you want to reopen this job posting?';
 
-  if (!confirm(confirmMsg)) return;
+  const confirmed = await showConfirm(confirmTitle, confirmText, 'Yes', 'Cancel');
+  if (!confirmed) return;
 
   try {
     setProcessing(true);
@@ -215,20 +227,22 @@ const handleToggleStatus = async () => {
     if (isClosing) {
       // Close job
       const res = await api.closeJob(id);
-      alert(res.data.message || 'Job closed successfully.');
+      showSuccess(res.data.message || 'Job closed successfully.');
+      // Update status locally without reloading the page
+      setJob((prev) => (prev ? { ...prev, status: 'closed' } : prev));
     } else {
       // Reopen job (backend validates timing)
       const res = await api.openJob(id);
-      alert(res.data.message || 'Job reopened successfully.');
+      showSuccess(res.data.message || 'Job reopened successfully.');
+      // Update status locally without reloading the page
+      setJob((prev) => (prev ? { ...prev, status: 'open' } : prev));
     }
-
-    await load(); // refresh job details
   } catch (err) {
     console.error(err);
     const message =
       err.response?.data?.message ||
       'Failed to update job status. Please try again.';
-    alert(message);
+    showError(message);
   } finally {
     setProcessing(false);
   }
@@ -237,15 +251,22 @@ const handleToggleStatus = async () => {
 
   // ✅ Delete Job
   const handleDelete = async () => {
-    if (!confirm('Delete this job permanently?')) return;
+    const confirmed = await showConfirm(
+      'Delete this job permanently?',
+      'This action cannot be undone. All associated data will be removed.',
+      'Yes, Delete',
+      'Cancel'
+    );
+    if (!confirmed) return;
+    
     try {
       setProcessing(true);
       await api.deleteJob(id);
-      alert('Job deleted successfully');
+      showSuccess('Job deleted successfully');
       nav('/admin');
     } catch (err) {
       console.error(err);
-      alert('Failed to delete job');
+      showError('Failed to delete job');
     } finally {
       setProcessing(false);
     }
@@ -443,7 +464,7 @@ const handleToggleStatus = async () => {
                 <div className="col-span-2">
                   <p className="text-xs text-gray-500">CTC Range</p>
                   <p className="font-medium">
-                    {job.jobDescription.ctc.min || '—'} - {job.jobDescription.ctc.max || '—'}
+                    ₹{formatINR(job.jobDescription.ctc.min)} - ₹{formatINR(job.jobDescription.ctc.max)}
                   </p>
                 </div>
               )}

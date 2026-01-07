@@ -1,6 +1,7 @@
 // src/components/AssignJob.jsx
 import { useEffect, useState } from 'react';
 import api from '../assets/lib/api';
+import { showSuccess, showError } from '../utils/notify';
 
 export default function AssignJob({ jobId, currentAssignee, onAssigned }) {
   const [managers, setManagers] = useState([]);
@@ -25,11 +26,11 @@ export default function AssignJob({ jobId, currentAssignee, onAssigned }) {
     try {
       setSaving(true);
       await api.updateJob(jobId, JSON.stringify({ assignedTo: selected }));
-      alert('Assigned successfully');
+      showSuccess('Assigned successfully');
       onAssigned && onAssigned(selected);
     } catch (err) {
       console.error(err);
-      alert('Failed to assign');
+      showError('Failed to assign');
     } finally {
       setSaving(false);
     }

@@ -344,6 +344,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { showError } from "../utils/notify";
 
 const StatCard = ({ icon, label, value, accent }) => (
   <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-md hover:shadow-lg transition-all flex items-center gap-5 border border-gray-100">
@@ -405,7 +406,7 @@ export default function AdminDashboard() {
       setFilteredJobs(jobsData);
     } catch (err) {
       console.error("Load error", err);
-      alert("Failed to load dashboard data");
+      showError("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }

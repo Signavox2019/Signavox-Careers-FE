@@ -139,6 +139,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { Trash2, Plus, File, Calendar, Users, X } from "lucide-react";
 import api from "../assets/lib/api";
+import { showError, showSuccess } from "../utils/notify";
 
 const HIRING_STAGE_OPTIONS = [
   "applied",
@@ -331,7 +332,7 @@ export default function JobForm() {
           reset(job);
         } catch (err) {
           console.error(err);
-          alert("Failed to load job details");
+          showError("Failed to load job details");
         } finally {
           setLoading(false);
         }
@@ -446,23 +447,58 @@ const onSubmit = async (data) => {
   try {
     const formData = new FormData();
 
-    // Append simple fields
-    Object.keys(data).forEach((key) => {
-      if (key !== 'documents' && typeof data[key] !== 'object') {
-        formData.append(key, data[key]);
-      }
-    });
+    // Append simple fields (title, location, type, experience, closingDate, assignedTo, status)
+    formData.append("title", data.title || "");
+    formData.append("location", data.location || "");
+    formData.append("type", data.type || "");
+    formData.append("experience", data.experience || "");
+    formData.append("closingDate", data.closingDate || "");
+    if (data.assignedTo) {
+      formData.append("assignedTo", data.assignedTo);
+    }
+    if (data.status) {
+      formData.append("status", data.status);
+    }
 
-    // Append nested objects
-    formData.append('jobDescription', JSON.stringify(data.jobDescription));
-    formData.append('eligibilityCriteria', JSON.stringify(data.eligibilityCriteria));
-    formData.append('stages', JSON.stringify(data.stages));
-    formData.append('responsibilities', JSON.stringify(data.responsibilities));
+    // Clean and prepare jobDescription
+    const jobDescription = {
+      ...(data.jobDescription || {}),
+      responsibilities: (data.jobDescription?.responsibilities || []).filter((r) => r && r.trim()),
+      requirements: (data.jobDescription?.requirements || []).filter((r) => r && r.trim()),
+      benefits: (data.jobDescription?.benefits || []).filter((b) => b && b.trim()),
+      summary: {
+        overview: data.jobDescription?.summary?.overview || "",
+        responsibilities: (data.jobDescription?.summary?.responsibilities || []).filter((r) => r && r.trim()),
+        qualifications: (data.jobDescription?.summary?.qualifications || []).filter((q) => q && q.trim()),
+      },
+    };
+    // Remove document array from jobDescription (backend handles this separately)
+    delete jobDescription.document;
+    formData.append("jobDescription", JSON.stringify(jobDescription));
 
-    // Append uploaded documents
+    // Clean and prepare hiringWorkflow - filter out empty stages
+    const hiringWorkflow = {
+      stages: (data.hiringWorkflow?.stages || [])
+        .filter((stage) => stage.stage && stage.stage.trim())
+        .map((stage) => ({
+          stage: stage.stage.trim(),
+          description: stage.description?.trim() || "",
+        })),
+    };
+    formData.append("hiringWorkflow", JSON.stringify(hiringWorkflow));
+
+    // Clean and prepare eligibilityCriteria
+    const eligibilityCriteria = {
+      required: (data.eligibilityCriteria?.required || []).filter((r) => r && r.trim()),
+      preferred: (data.eligibilityCriteria?.preferred || []).filter((p) => p && p.trim()),
+      skills: (data.eligibilityCriteria?.skills || []).filter((s) => s && s.trim()),
+    };
+    formData.append("eligibilityCriteria", JSON.stringify(eligibilityCriteria));
+
+    // Append uploaded documents (backend expects 'document' key, not 'documents')
     if (data.documents && data.documents.length > 0) {
       for (let i = 0; i < data.documents.length; i++) {
-        formData.append('documents', data.documents[i]);
+        formData.append("document", data.documents[i]);
       }
     }
 
@@ -474,10 +510,10 @@ const onSubmit = async (data) => {
       });
 
       if (response.status === 200) {
-        alert('Job updated successfully!');
+        showSuccess('Job updated successfully');
         navigate("/admin");
       } else {
-        alert('Something went wrong while updating the job');
+        showError('Something went wrong while updating the job');
       }
     } else {
       // 🆕 Create mode
@@ -486,16 +522,16 @@ const onSubmit = async (data) => {
       });
 
       if (response.status === 201) {
-        alert('Job created successfully!');
+        showSuccess('Job created successfully');
         reset();
         navigate("/admin");
       } else {
-        alert('Something went wrong while creating the job');
+        showError('Something went wrong while creating the job');
       }
     }
   } catch (error) {
     console.error('Error submitting job:', error);
-    alert(error.response?.data?.message || 'Server Error');
+    showError(error.response?.data?.message || 'Server Error');
   }
 };
 

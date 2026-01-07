@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Ensure SweetAlert2 toasts appear above navbar (z-index 9998) */
+.swal2-container {
+  z-index: 10000 !important;
+}
+
+.swal2-toast-container-high-z {
+  z-index: 10000 !important;
+}

@@ -1,6 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../assets/lib/api";
+import { showError, showSuccess } from "../utils/notify";
+
+const STAGE_ORDER = [
+  "applied",
+  "resume_shortlisted",
+  "screening_test",
+  "group_discussion",
+  "technical_interview",
+  "manager_interview",
+  "hr_interview",
+  "selected",
+  "offered",
+  "rejected",
+  "hired",
+];
 
 const formatLabel = (value) =>
   value
@@ -13,17 +28,44 @@ const formatLabel = (value) =>
 export default function ApplicantDetails() {
   const { userId } = useParams(); // from /admin/jobs/:id/applicants/:userId
   const nav = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [application, setApplication] = useState(null);
+  const [job, setJob] = useState(null);
+  const [workflow, setWorkflow] = useState([]);
+  const [processing, setProcessing] = useState(false);
+
+  // Get jobId from location state (if navigated from ManageApplicants) or search params
+  const jobId = location.state?.jobId || new URLSearchParams(location.search).get('jobId');
 
   const load = async () => {
     try {
       setLoading(true);
       const res = await api.get(`/users/${userId}`);
       setUser(res.data.user); // backend returns { user: { ... } }
+
+      // If jobId is available, fetch job and application data
+      if (jobId) {
+        try {
+          const jobRes = await api.fetchJob(jobId);
+          setJob(jobRes.data);
+          setWorkflow(jobRes.data.hiringWorkflow?.stages || []);
+          
+          // Find the application for this user
+          const userApplication = jobRes.data.applicants?.find(
+            (app) => app.candidate?._id === userId || app.candidate?._id === user._id
+          );
+          if (userApplication) {
+            setApplication(userApplication);
+          }
+        } catch (err) {
+          console.error("Failed to fetch job/application data:", err);
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch applicant details:", err);
-      alert("Failed to load applicant details");
+      showError("Failed to load applicant details");
     } finally {
       setLoading(false);
     }
@@ -31,19 +73,195 @@ export default function ApplicantDetails() {
 
   useEffect(() => {
     load();
-  }, [userId]);
+  }, [userId, jobId]);
+
+  // Update application status (move to next stage or reject)
+  const updateStatus = async (nextStageName, action, notes = "") => {
+    if (!application?._id) {
+      showError("Application not found. Please navigate from the applicants list.");
+      return;
+    }
+
+    // Guard: if this job has no configured workflow, avoid calling the API
+    if (!workflow || workflow.length === 0) {
+      showError(
+        "No stages configured for this job. Please add stages in the job workflow before moving applicants."
+      );
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      const normalizedStage = nextStageName?.toLowerCase();
+
+      // Backend expects { stageName, action }
+      const payload = {
+        stageName: normalizedStage,
+        action,
+      };
+
+      const response = await api.put(
+        `/applications/${application._id}/stage`,
+        payload
+      );
+
+      // Update local state
+      setApplication((prev) => ({
+        ...prev,
+        stage: response.data.application.stage,
+      }));
+
+      showSuccess(
+        action === "accept"
+          ? `Moved to ${formatLabel(nextStageName)}`
+          : "Applicant rejected"
+      );
+    } catch (error) {
+      console.error("Failed to update application status:", error);
+      showError(error.response?.data?.message || "Failed to update stage");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Calculate next stage based on last accepted/completed stage
+  const getNextStageInfo = () => {
+    if (!application || !job) return null;
+
+    const customStages = (Array.isArray(workflow) ? workflow : [])
+      .map((s) => s?.stage)
+      .filter(Boolean);
+
+    const orderedStages = [
+      ...STAGE_ORDER.filter((stage) =>
+        customStages.some((s) => s?.toLowerCase() === stage)
+      ),
+      ...customStages.filter(
+        (s) => !STAGE_ORDER.includes(s?.toLowerCase?.())
+      ),
+    ];
+
+    const stagesSource = orderedStages.length ? orderedStages : STAGE_ORDER;
+
+    // Last accepted/completed stage from stageWiseStatus
+    const acceptedStageNames = (application.stageWiseStatus || [])
+      .filter((s) => s.status === "completed" && s.action === "accept")
+      .map((s) => s.stageName?.toLowerCase())
+      .filter(Boolean);
+
+    let lastAcceptedStage = null;
+    stagesSource.forEach((stageCode) => {
+      if (acceptedStageNames.includes(stageCode.toLowerCase())) {
+        lastAcceptedStage = stageCode;
+      }
+    });
+
+    const currentStageRaw =
+      lastAcceptedStage ||
+      stagesSource[0] ||
+      "applied";
+
+    const currentStage = currentStageRaw.toLowerCase();
+    const currentIndex = Math.max(
+      0,
+      stagesSource.findIndex((s) => s?.toLowerCase() === currentStage)
+    );
+
+    const isFinalStage = currentIndex === stagesSource.length - 1;
+    const nextStageCode = stagesSource[currentIndex + 1];
+
+    return {
+      currentStage,
+      currentIndex,
+      isFinalStage,
+      nextStageCode,
+      stagesSource,
+    };
+  };
+
+  const stageInfo = getNextStageInfo();
 
   if (loading) return <div className="p-8">Loading applicant details...</div>;
   if (!user) return <div className="p-8 text-red-600">Applicant not found</div>;
 
   return (
     <div className="w-full px-4 md:px-8 py-6">
-      <button
-        onClick={() => nav(-1)}
-        className="mb-4 px-4 py-2 border rounded-md hover:bg-gray-100"
-      >
-        Back
-      </button>
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => nav(-1)}
+          className="px-4 py-2 border rounded-md hover:bg-gray-100"
+        >
+          Back
+        </button>
+
+        {/* Action Buttons - Only show if application and job data are available */}
+        {application && job && stageInfo && (
+          <div className="flex gap-2">
+            {application.stage !== "rejected" && application.stage !== "hired" && (
+              <>
+                <button
+                  onClick={() =>
+                    stageInfo.isFinalStage
+                      ? updateStatus(
+                          "hired",
+                          "accept",
+                          "Offer letter generated and applicant hired"
+                        )
+                      : updateStatus(
+                          stageInfo.nextStageCode,
+                          "accept",
+                          `Moved to next stage: ${formatLabel(stageInfo.nextStageCode)}`
+                        )
+                  }
+                  disabled={processing}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {processing
+                    ? "Processing..."
+                    : stageInfo.isFinalStage
+                    ? "Generate Offer Letter"
+                    : `Move to ${formatLabel(stageInfo.nextStageCode) || "Next Stage"}`}
+                </button>
+                <button
+                  onClick={() =>
+                    updateStatus(
+                      stageInfo.currentStage,
+                      "reject",
+                      `Rejected at stage ${stageInfo.currentStage}`
+                    )
+                  }
+                  disabled={processing}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reject
+                </button>
+              </>
+            )}
+            {application.stage === "rejected" && (
+              <span className="px-4 py-2 bg-red-100 text-red-700 rounded-md">
+                Status: Rejected
+              </span>
+            )}
+            {application.stage === "hired" && (
+              <span className="px-4 py-2 bg-green-100 text-green-700 rounded-md">
+                Status: Hired
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Current Stage Display */}
+      {application && stageInfo && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-gray-600">
+            Current Stage:{" "}
+            <span className="font-semibold text-gray-800">
+              {formatLabel(stageInfo.currentStage)}
+            </span>
+          </p>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row gap-8 w-full">
         {/* Profile Card */}
         <div className="bg-white shadow-md rounded-2xl p-6 w-full md:max-w-xs flex flex-col items-center">

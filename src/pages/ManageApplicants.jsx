@@ -304,6 +304,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../assets/lib/api";
+import { showError, showSuccess } from "../utils/notify";
 
 const STAGE_ORDER = [
     "applied",
@@ -345,7 +346,7 @@ export default function ManageApplicants() {
             setWorkflow(res.data.hiringWorkflow?.stages || []);
         } catch (err) {
             console.error("Error loading applicants:", err);
-            alert("Failed to load applicants");
+            showError("Failed to load applicants");
         } finally {
             setLoading(false);
         }
@@ -356,30 +357,45 @@ export default function ManageApplicants() {
     }, [id]);
 
     // ✅ Update application status (accept/reject)
-    const updateStatus = async (applicationId, nextStageName, action, notes = "") => {
+    const updateStatus = async (applicationId, stageName, action) => {
         try {
-            // Normalize stage to lowercase to match backend naming
-            const normalizedStage = nextStageName?.toLowerCase();
+            // Normalize stage to lowercase to match backend naming / enums
+            const normalizedStage = stageName?.toLowerCase();
 
-            console.log("📤 Sending payload:", {
-                stage: normalizedStage,
+            // Backend expects { stageName, action }
+            const payload = {
+                stageName: normalizedStage,
                 action,
-                notes,
-            });
+            };
 
-            const response = await api.put(`/applications/${applicationId}/stage`, {
-                stage: normalizedStage, // backend expects lowercase
-                action,
-                notes,
-            });
+            console.log("📤 Sending payload:", payload);
+
+            const response = await api.put(
+                `/applications/${applicationId}/stage`,
+                payload
+            );
 
             console.log("✅ Stage updated successfully:", response.data);
 
+            const responseData = response.data;
+
+            // Show success toast notification
+            if (action === "accept") {
+                showSuccess(responseData.message || `Moved to ${formatLabel(responseData.currentStage)}`);
+            } else {
+                showSuccess(responseData.message || "Applicant rejected");
+            }
+
             // ✅ Update frontend state after successful update
+            // Update the applicant with new currentStage and stageDetails from response
             setApplicants((prev) =>
                 prev.map((app) =>
                     app._id === applicationId
-                        ? { ...app, stage: response.data.application.stage }
+                        ? {
+                              ...app,
+                              stage: responseData.currentStage,
+                              stageWiseStatus: responseData.stageDetails || app.stageWiseStatus,
+                          }
                         : app
                 )
             );
@@ -388,7 +404,7 @@ export default function ManageApplicants() {
                 "❌ Failed to update application status:",
                 error.response?.data || error
             );
-            alert(error.response?.data?.message || "Failed to update stage");
+            showError(error.response?.data?.message || "Failed to update stage");
         }
     };
 
@@ -415,42 +431,67 @@ export default function ManageApplicants() {
                                 "Unknown";
                             const email = app.candidate?.email || app.candidateEmail || "—";
 
-            const customStages = (workflow.length ? workflow.map((s) => s.stage) : []).filter(Boolean);
+                            // Get workflow stages order (this is the actual order for this job)
+                            const workflowStages = (Array.isArray(workflow) ? workflow : [])
+                                .map((s) => s?.stage)
+                                .filter(Boolean);
 
-            // Order stages according to STAGE_ORDER and append any unknowns at the end
-            const orderedStages = [
-                ...STAGE_ORDER.filter((stage) =>
-                    customStages.some((s) => s?.toLowerCase() === stage)
-                ),
-                ...customStages.filter(
-                    (s) => !STAGE_ORDER.includes(s?.toLowerCase?.())
-                ),
-            ];
+                            // Use workflow stages order if available, otherwise fallback to STAGE_ORDER
+                            // STAGE_ORDER is just for reference/validation, not the actual order
+                            const stagesSource = workflowStages.length > 0 ? workflowStages : STAGE_ORDER;
 
-            const stagesSource = orderedStages.length ? orderedStages : STAGE_ORDER;
+                            // Determine current stage from response or stageWiseStatus
+                            // Priority: app.stage (from API response) > stageWiseStatus > first stage
+                            let currentStage = null;
+                            
+                            if (app.stage) {
+                                // Use the stage from the application (updated by API)
+                                currentStage = app.stage.toLowerCase();
+                            } else {
+                                // Fallback: find last completed stage from stageWiseStatus
+                                const completedStages = (app.stageWiseStatus || [])
+                                    .filter((s) => s.status === "completed" && s.action === "accept")
+                                    .map((s) => s.stageName?.toLowerCase())
+                                    .filter(Boolean);
 
-            const currentStageRaw =
-                app.stage ||
-                app.stageWiseStatus?.find((s) => s.status === "in_review")
-                    ?.stageName ||
-                stagesSource[0] ||
-                "applied";
+                                // Find the last completed stage in the workflow order
+                                for (let i = stagesSource.length - 1; i >= 0; i--) {
+                                    const stageCode = stagesSource[i]?.toLowerCase();
+                                    if (completedStages.includes(stageCode)) {
+                                        currentStage = stageCode;
+                                        break;
+                                    }
+                                }
 
-            const currentStage = currentStageRaw.toLowerCase();
+                                // If no completed stage found, use the first stage
+                                if (!currentStage) {
+                                    currentStage = stagesSource[0]?.toLowerCase() || "applied";
+                                }
+                            }
 
-            const currentIndex = Math.max(
-                0,
-                stagesSource.findIndex(
-                    (s) => s?.toLowerCase() === currentStage
-                )
-            );
+                            // Find current stage index in workflow
+                            const currentIndex = Math.max(
+                                0,
+                                stagesSource.findIndex(
+                                    (s) => s?.toLowerCase() === currentStage
+                                )
+                            );
 
-            const isFinalStage = currentIndex === stagesSource.length - 1;
-            const nextStageCode = stagesSource[currentIndex + 1];
+                            // Determine next / final stage info
+                            const isFinalStage = currentIndex === stagesSource.length - 1;
+                            const nextStageCode = stagesSource[currentIndex + 1];
 
-                            const nextButtonLabel = isFinalStage
-                                ? "Generate Offer Letter"
-                : `Move to ${formatLabel(nextStageCode) || "Next Stage"}`;
+                            // Check if the last stage in the workflow is already completed
+                            const lastStageCode = stagesSource[stagesSource.length - 1]?.toLowerCase();
+                            const lastStageStatus = (app.stageWiseStatus || []).find(
+                                (s) => s.stageName?.toLowerCase() === lastStageCode
+                            );
+                            const isLastStageCompleted =
+                                !!lastStageStatus &&
+                                lastStageStatus.status === "completed" &&
+                                lastStageStatus.action === "accept";
+
+                            const nextButtonLabel = `${formatLabel(currentStage)} - Cleared`;
 
                             return (
                                 <li
@@ -488,32 +529,24 @@ export default function ManageApplicants() {
                                     <div className="flex gap-2 items-center mt-3 sm:mt-0">
                                         <button
                                             onClick={() =>
-                                                navigate(`/admin/applicants/${app.candidate?._id}`)
+                                                navigate(`/admin/applicants/${app.candidate?._id}`, {
+                                                    state: { jobId: id }
+                                                })
                                             }
                                             className="px-3 py-2 border rounded hover:bg-gray-100"
                                         >
                                             View
                                         </button>
 
-                                        {/* Move to Next Stage */}
-                                        {app.stage !== "rejected" && app.stage !== "hired" && (
+                                        {/* Move to Next Stage (hide after final stage is fully completed) */}
+                                        {app.stage !== "rejected" && !isLastStageCompleted && (
                                             <button
                                                 onClick={() =>
-                                                    isFinalStage
-                                                        ? updateStatus(
-                                                            app._id,
-                                                            "hired",
-                                                            "accept",
-                                                            "Offer letter generated and applicant hired"
-                                                        )
-                                                        : updateStatus(
-                                                            app._id,
-                                                            nextStageCode,
-                                                            "accept",
-                                                            `Moved to next stage: ${formatLabel(
-                                                                nextStageCode
-                                                            )}`
-                                                        )
+                                                    updateStatus(
+                                                        app._id,
+                                                        currentStage,
+                                                        "accept"
+                                                    )
                                                 }
                                                 className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                                             >
@@ -528,8 +561,7 @@ export default function ManageApplicants() {
                                                     updateStatus(
                                                         app._id,
                                                         currentStage,
-                                                        "reject",
-                                                        `Rejected at stage ${currentStage}`
+                                                        "reject"
                                                     )
                                                 }
                                                 className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"

@@ -56,8 +56,8 @@ const Notification = ({
   if (!show) return null;
 
   return (
-    <div className={`fixed top-4 right-4 z-[10000] transform transition-all duration-300 ${
-      show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+    <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[10000] transform transition-all duration-300 ${
+      show ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
     }`}>
       <div className={`max-w-md w-96 bg-white border rounded-xl shadow-xl ${getStyles()}`}>
         <div className="p-5">
