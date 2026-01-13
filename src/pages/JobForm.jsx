@@ -134,7 +134,7 @@
 // src/pages/JobForm.jsx
 
 // src/pages/JobForm.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { Trash2, Plus, File, Calendar, Users, X } from "lucide-react";
@@ -244,6 +244,7 @@ export default function JobForm() {
   const [users, setUsers] = useState([]);
   const [existingDocs, setExistingDocs] = useState([]); // array of { _id, name, url, uploadedAt }
   const [newFilesPreview, setNewFilesPreview] = useState([]); // File list preview
+  const fileInputRef = useRef(null);
 
   // watch documents input to show previews
   const watchedNewFiles = watch("documents");
@@ -260,6 +261,26 @@ export default function JobForm() {
       setNewFilesPreview([]);
     }
   }, [watchedNewFiles]);
+
+  // Remove a new file from preview and form
+  const removeNewFile = (indexToRemove) => {
+    const updatedPreview = newFilesPreview.filter((_, index) => index !== indexToRemove);
+    setNewFilesPreview(updatedPreview);
+
+    // Create a new FileList with remaining files
+    const dataTransfer = new DataTransfer();
+    updatedPreview.forEach((item) => {
+      dataTransfer.items.add(item.file);
+    });
+
+    // Update the form value
+    setValue("documents", dataTransfer.files);
+
+    // Clear the input if no files remain
+    if (updatedPreview.length === 0 && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   // --- Fetch assignable users (admin/recruiter) ---
   useEffect(() => {
@@ -703,8 +724,11 @@ const onSubmit = async (data) => {
                 <div>
                   <label className="text-sm text-gray-600">CTC - Min</label>
                   <input
+                    type="number"
+                    min="0"
+                    step="1"
                     {...register("jobDescription.ctc.min")}
-                    placeholder="e.g., 8,00,000"
+                    placeholder="e.g., 800000"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -712,8 +736,11 @@ const onSubmit = async (data) => {
                 <div>
                   <label className="text-sm text-gray-600">CTC - Max</label>
                   <input
+                    type="number"
+                    min="0"
+                    step="1"
                     {...register("jobDescription.ctc.max")}
-                    placeholder="e.g., 12,00,000"
+                    placeholder="e.g., 1200000"
                     className="mt-1 block w-full border border-gray-200 rounded-lg px-4 py-2"
                   />
                 </div>
@@ -1097,9 +1124,18 @@ const onSubmit = async (data) => {
               <div className="space-y-2">
                 <label className="block text-sm text-gray-600">Upload new documents</label>
                 <input
-                  {...register("documents")}
                   type="file"
                   multiple
+                  {...(() => {
+                    const { ref, ...rest } = register("documents");
+                    return {
+                      ...rest,
+                      ref: (e) => {
+                        fileInputRef.current = e;
+                        if (ref) ref(e);
+                      }
+                    };
+                  })()}
                   className="w-full text-sm file:border-0 file:bg-gray-100 file:rounded-md file:px-3 file:py-2"
                 />
 
@@ -1107,14 +1143,22 @@ const onSubmit = async (data) => {
                 {newFilesPreview.length > 0 && (
                   <div className="mt-3 grid gap-2">
                     {newFilesPreview.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between p-2 rounded-md border border-gray-100 bg-white">
+                      <div key={`${f.name}-${f.size}-${i}`} className="flex items-center justify-between p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50">
                         <div className="flex items-center gap-3">
-                          <File size={16} />
+                          <File size={18} className="text-gray-500" />
                           <div>
-                            <div className="text-sm text-gray-700">{f.name}</div>
+                            <div className="text-sm text-gray-700 font-medium">{f.name}</div>
                             <div className="text-xs text-gray-400">{Math.round(f.size / 1024)} KB</div>
                           </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeNewFile(i)}
+                          className="p-2 rounded-md hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"
+                          title="Remove file"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     ))}
                   </div>

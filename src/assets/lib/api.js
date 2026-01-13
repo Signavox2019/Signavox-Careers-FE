@@ -31,6 +31,7 @@ export default {
   openJob: (id) => api.put(`/jobs/${id}/reopen`),
   getJobStats: () => api.get("/jobs/stats/summary"),
   fetchManagers: () => api.get("/users", { params: { role: "manager" } }),
+  fetchRecruiterDashboard: () => api.get("/users/recruiter/my-stats"),
  
   /** -------------------------------
    * APPLICATION ROUTES

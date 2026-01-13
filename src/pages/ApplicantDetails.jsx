@@ -374,6 +374,73 @@ export default function ApplicantDetails() {
                 </tbody>
               </table>
             </div>
+            {(user.educationGapFlags && user.educationGapFlags.length > 0) || 
+             (user.educationGaps && user.educationGaps.length > 0) ? (
+              <ul className="mt-4 ml-3 text-yellow-700 text-base list-disc">
+                {(user.educationGapFlags || user.educationGaps || []).map((flag, idx) => (
+                  <li key={idx} className="flex items-center gap-2">
+                    <span>{flag}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          {/* Experience Section */}
+          <div className="bg-white shadow-md rounded-2xl p-6 mb-6">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">Experience</h3>
+            {user.experiences && user.experiences.length > 0 ? (
+              <div className="space-y-4">
+                {user.experiences.map((exp, idx) => (
+                  <div
+                    key={idx}
+                    className="border rounded-lg p-4 bg-gray-50 hover:bg-white transition"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
+                      <div className="flex-1">
+                        <div className="font-semibold text-lg text-gray-800 mb-1">
+                          {formatLabel(exp.designation)}
+                        </div>
+                        <div className="text-gray-600 font-medium mb-2">
+                          {formatLabel(exp.companyName)}
+                        </div>
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        {exp.startDate && (
+                          <span>
+                            {new Date(exp.startDate).toLocaleDateString('en-US', {
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        )}
+                        {exp.startDate && (exp.endDate || !exp.endDate) && (
+                          <span className="mx-1">-</span>
+                        )}
+                        {exp.endDate ? (
+                          <span>
+                            {new Date(exp.endDate).toLocaleDateString('en-US', {
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        ) : (
+                          <span className="text-green-600 font-medium">Present</span>
+                        )}
+                      </div>
+                    </div>
+                    {exp.responsibilities && (
+                      <div className="text-gray-700 text-sm mt-3 pt-3 border-t border-gray-200">
+                        <p className="font-medium text-gray-600 mb-1">Key Responsibilities:</p>
+                        <p className="whitespace-pre-line">{exp.responsibilities}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No work experience added.</p>
+            )}
             {user.careerGapFlags && user.careerGapFlags.length > 0 && (
               <ul className="mt-4 ml-3 text-yellow-700 text-base list-disc">
                 {user.careerGapFlags.map((flag, idx) => (

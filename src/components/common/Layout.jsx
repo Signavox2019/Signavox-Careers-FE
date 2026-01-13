@@ -20,16 +20,16 @@ const Layout = ({ children }) => {
 
 
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/':
-        return 'Home';
-      case '/jobs':
-        return 'Jobs';
-      case '/profile':
-        return 'Profile';
-      default:
-        return 'CareerHub';
-    }
+    const path = location.pathname;
+    
+    if (path === '/') return 'Home';
+    if (path === '/home') return 'Home';
+    if (path === '/jobs') return 'Jobs';
+    if (path === '/profile') return 'Profile';
+    if (path === '/admin' || path.startsWith('/admin/')) return 'Admin Dashboard';
+    if (path === '/recruiter' || path.startsWith('/recruiter/')) return 'Recruiter Dashboard';
+    
+    return 'CareerHub';
   };
 
   return (

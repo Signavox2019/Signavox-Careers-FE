@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { apiService } from '../../api';
 import { formatLocation } from '../../utils/helpers';
+import { useAuth } from '../../contexts/AuthContext';
 
 const JobDetails = ({
   job,
@@ -15,8 +16,13 @@ const JobDetails = ({
   activeTab: controlledActiveTab,
   onTabChange,
 }) => {
+  const { user } = useAuth();
   const [localActiveTab, setLocalActiveTab] = useState('summary');
   const activeTab = controlledActiveTab ?? localActiveTab;
+  
+  // Check if user is candidate (not admin or recruiter)
+  const userRole = user?.role?.toLowerCase();
+  const isCandidate = !userRole || (userRole !== 'admin' && userRole !== 'recruiter');
 
   const handleTabChange = (tabId) => {
     if (onTabChange) {
@@ -147,8 +153,8 @@ const JobDetails = ({
 
   const tabs = [
     { id: 'summary', label: 'Summary' },
-    { id: 'workflow', label: 'Hiring Workflow' },
-    { id: 'eligibility', label: 'Eligibility Criteria' }
+    { id: 'eligibility', label: 'Eligibility Criteria' },
+    { id: 'workflow', label: 'Hiring Workflow' }
   ];
 
   return (
@@ -170,19 +176,22 @@ const JobDetails = ({
               </span>
             )
           ) : (
-            <button 
-              onClick={() => onApply && onApply(currentJob)}
-              disabled={isApplied}
-              className={`px-5 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm ml-4 ${
-                isApplied 
-                  ? 'bg-green-600 text-white cursor-not-allowed' 
-                  : isAuthenticated 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'bg-gray-400 text-white cursor-not-allowed'
-              }`}
-            >
-              {isApplied ? 'Applied' : 'Apply Now'}
-            </button>
+            // Only show Apply Now button for candidates (not admin or recruiter)
+            isCandidate && (
+              <button 
+                onClick={() => onApply && onApply(currentJob)}
+                disabled={isApplied}
+                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm ml-4 ${
+                  isApplied 
+                    ? 'bg-green-600 text-white cursor-not-allowed' 
+                    : isAuthenticated 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-gray-400 text-white cursor-not-allowed'
+                }`}
+              >
+                {isApplied ? 'Applied' : 'Apply Now'}
+              </button>
+            )
           )}
         </div>
         

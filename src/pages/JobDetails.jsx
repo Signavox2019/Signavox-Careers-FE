@@ -272,7 +272,18 @@ const handleToggleStatus = async () => {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative w-12 h-12">
+            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin"></div>
+          </div>
+          <p className="text-sm font-medium text-gray-600">Loading job details...</p>
+        </div>
+      </div>
+    );
+  }
   if (!job) return <div className="p-6">Job not found</div>;
 
   return (

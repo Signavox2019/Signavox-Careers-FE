@@ -20,6 +20,17 @@ import JobForm from "./pages/JobForm";
 import JobDetails from "./pages/JobDetails";
 import ManageApplicants from "./pages/ManageApplicants";
 import ApplicantDetails from "./pages/ApplicantDetails";
+import Recruiter from './pages/Recruiter';
+import RecruiterDetails from './pages/RecruiterDetails';
+
+
+// Recruiter Pages
+import RecruiterDashboard from './pages/RecruiterDashboard';
+import RecruiterJobDetails from './pages/RecruiterJobDetails';
+import RecruiterManageApplicant from './pages/RecruiterManageApplicant';
+
+// Common Components
+import RoleBasedRedirect from './components/common/RoleBasedRedirect';
 
 function App() {
   return (
@@ -58,6 +69,13 @@ function App() {
 
                 {/* Main Application Routes */}
                 <Route path="/" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={false}>
+                      <RoleBasedRedirect />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+                <Route path="/home" element={
                   <Layout>
                     <HomePage />
                   </Layout>
@@ -118,6 +136,55 @@ function App() {
                     </ProtectedRoute>
                   </Layout>
                 } />
+
+
+                <Route path="/admin/recruiter" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                      <Recruiter />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+
+                <Route path="/admin/recruiter/:id" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                      <RecruiterDetails />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+
+                {/* Recruiter Routes */}
+                <Route path="/recruiter" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireRecruiter={true}>
+                      <RecruiterDashboard />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+                <Route path="/recruiter/jobs/:id" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireRecruiter={true}>
+                      <RecruiterJobDetails />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+                <Route path="/recruiter/jobs/:id/applicants" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireRecruiter={true}>
+                      <RecruiterManageApplicant />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+                <Route path="/recruiter/applicants/:userId" element={
+                  <Layout>
+                    <ProtectedRoute requireAuth={true} requireRecruiter={true}>
+                      <ApplicantDetails />
+                    </ProtectedRoute>
+                  </Layout>
+                } />
+
+
 
                 {/* Catch-all route for undefined paths */}
                 <Route path="*" element={<Navigate to="/" replace />} />

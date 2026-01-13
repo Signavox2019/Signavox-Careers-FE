@@ -28,9 +28,13 @@ import {
 } from 'lucide-react';
 
 const HomePage = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();
   const { startNavigation } = useNavigation();
+  
+  // Check if user is candidate (not admin or recruiter)
+  const userRole = user?.role?.toLowerCase();
+  const isCandidate = !userRole || (userRole !== 'admin' && userRole !== 'recruiter');
 
   useEffect(() => {
     // Show SweetAlert for logged-out users after a short delay
@@ -218,7 +222,7 @@ const HomePage = () => {
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Cybersecurity</h3>
                   <p className="text-gray-600 text-sm">Security Solutions</p>
                   <div className="mt-4 flex items-center text-purple-600 text-sm font-medium">
-                    <span>Apply Now</span>
+                    <span>{isCandidate ? 'Apply Now' : 'View Positions'}</span>
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
@@ -464,14 +468,16 @@ const HomePage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <button
-              // onClick={() => scrollToSection('careers')}
-              onClick={() => navigate('/jobs')}
-              className="group px-12 cursor-pointer py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
-            >
-              Apply Now
-              <ArrowRight className="inline-block ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </button>
+            {isCandidate && (
+              <button
+                // onClick={() => scrollToSection('careers')}
+                onClick={() => navigate('/jobs')}
+                className="group px-12 cursor-pointer py-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-semibold text-xl text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+              >
+                Apply Now
+                <ArrowRight className="inline-block ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </button>
+            )}
             {!isAuthenticated && (
               <button
                 onClick={() => {

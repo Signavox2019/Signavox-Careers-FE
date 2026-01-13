@@ -69,7 +69,7 @@ const CertificationModal = ({ isOpen, initialData, onClose, onSave, loading }) =
     <div className="fixed inset-0 z-[10020] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={loading ? undefined : onClose} />
       <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-indigo-100">
-        <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-between">
+        <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-white/70">
               {initialData?._id ? 'Update certification' : 'Add certification'}

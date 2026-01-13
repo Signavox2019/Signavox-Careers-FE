@@ -3,8 +3,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { isAuthPage, getRedirectPath } from '../../utils/routeProtection';
 import { useEffect, useState } from 'react';
 
-const ProtectedRoute = ({ children, requireAuth = true, authPages = [] }) => {
-  const { isAuthenticated, loading, checkTokenValidity } = useAuth();
+const ProtectedRoute = ({ children, requireAuth = true, authPages = [], requireAdmin = false, requireRecruiter = false }) => {
+  const { isAuthenticated, loading, checkTokenValidity, user } = useAuth();
   const location = useLocation();
   const [isValidating, setIsValidating] = useState(false);
 
@@ -50,7 +50,14 @@ const ProtectedRoute = ({ children, requireAuth = true, authPages = [] }) => {
 
   // If route requires no authentication but user is authenticated (like login/register pages)
   if (!requireAuth && isAuthenticated) {
-    return <Navigate to="/" replace />;
+    const userRole = user?.role?.toLowerCase();
+    if (userRole === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    if (userRole === 'recruiter') {
+      return <Navigate to="/recruiter" replace />;
+    }
+    return <Navigate to="/home" replace />;
   }
 
   // Additional check for specific auth pages when user is authenticated
@@ -59,7 +66,35 @@ const ProtectedRoute = ({ children, requireAuth = true, authPages = [] }) => {
     const isCurrentAuthPage = authPages.some(page => currentPath === `/${page}` || currentPath.startsWith(`/${page}/`));
     
     if (isCurrentAuthPage) {
-      return <Navigate to="/" replace />;
+      const userRole = user?.role?.toLowerCase();
+      if (userRole === 'admin') {
+        return <Navigate to="/admin" replace />;
+      }
+      if (userRole === 'recruiter') {
+        return <Navigate to="/recruiter" replace />;
+      }
+      return <Navigate to="/home" replace />;
+    }
+  }
+
+  // Role-based access control
+  if (requireAuth && isAuthenticated && user) {
+    const userRole = user.role?.toLowerCase();
+    
+    if (requireAdmin && userRole !== 'admin') {
+      // Redirect to appropriate dashboard based on role
+      if (userRole === 'recruiter') {
+        return <Navigate to="/recruiter" replace />;
+      }
+      return <Navigate to="/home" replace />;
+    }
+    
+    if (requireRecruiter && userRole !== 'recruiter') {
+      // Redirect to appropriate dashboard based on role
+      if (userRole === 'admin') {
+        return <Navigate to="/admin" replace />;
+      }
+      return <Navigate to="/home" replace />;
     }
   }
 

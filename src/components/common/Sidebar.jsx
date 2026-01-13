@@ -1,35 +1,72 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Briefcase, User, Menu, X } from 'lucide-react';
+import { Home, Briefcase, User, Menu, X, LayoutDashboard } from 'lucide-react';
 import logo from '../../assets/snignavox_icon.png';
 import { useState } from 'react';
 import { useNavigation } from '../../contexts/NavigationContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
   const { startNavigation } = useNavigation();
+  const { isAuthenticated, user } = useAuth();
 
   const isActive = (path) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const navigationItems = [
-    {
-      name: 'Home',
-      href: '/',
-      icon: Home,
-    },
-    {
-      name: 'Jobs',
-      href: '/jobs',
-      icon: Briefcase,
-    },
-    {
-      name: 'Profile',
-      href: '/profile',
-      icon: User,
-    },
-  ];
+  // Get navigation items based on user role
+  const getNavigationItems = () => {
+    const userRole = user?.role?.toLowerCase();
+    
+    // Base items for all authenticated users
+    const baseItems = [
+      {
+        name: 'Home',
+        href: '/home',
+        icon: Home,
+      },
+      {
+        name: 'Jobs',
+        href: '/jobs',
+        icon: Briefcase,
+      },
+      {
+        name: 'Profile',
+        href: '/profile',
+        icon: User,
+      },
+    ];
+
+    // Admin-specific items
+    if (userRole === 'admin') {
+      return [
+        {
+          name: 'Dashboard',
+          href: '/admin',
+          icon: LayoutDashboard,
+        },
+        ...baseItems,
+      ];
+    }
+
+    // Recruiter-specific items
+    if (userRole === 'recruiter') {
+      return [
+        {
+          name: 'Dashboard',
+          href: '/recruiter',
+          icon: LayoutDashboard,
+        },
+        ...baseItems,
+      ];
+    }
+
+    // Regular user items
+    return baseItems;
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <>

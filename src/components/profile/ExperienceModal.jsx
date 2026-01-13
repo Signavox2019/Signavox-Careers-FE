@@ -65,7 +65,7 @@ const ExperienceModal = ({ isOpen, initialData, onClose, onSave, loading }) => {
     <div className="fixed inset-0 z-[10020] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={loading ? undefined : onClose} />
       <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-indigo-100">
-        <div className="px-8 py-6 bg-gradient-to-r from-slate-900 via-indigo-700 to-purple-600 text-white flex items-center justify-between">
+        <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-white/70">
               {initialData?._id ? 'Update experience' : 'Add experience'}
@@ -159,7 +159,7 @@ const ExperienceModal = ({ isOpen, initialData, onClose, onSave, loading }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-700 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving…' : (initialData?._id ? 'Update Experience' : 'Add Experience')}
             </button>

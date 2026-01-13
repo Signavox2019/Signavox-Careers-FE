@@ -879,7 +879,7 @@ const ProfilePage = () => {
         </div>
         <button
           onClick={openNewEducationModal}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -899,10 +899,10 @@ const ProfilePage = () => {
           </div>
         </div>
       ) : educationList && educationList.length > 0 ? (
-        <ol className="relative border-l border-indigo-100 pl-6 space-y-8">
+        <ol className="relative border-l-2 border-indigo-200 pl-6 space-y-8">
           {educationList.map((edu, index) => (
-            <li key={edu._id || index} className="ml-3">
-              <span className="absolute -left-3.5 top-2 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 border-4 border-white shadow-lg" />
+            <li key={edu._id || index} className="relative ml-3">
+              <span className="absolute -left-[48px] top-2 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 border-4 border-white shadow-lg z-10" />
               <div className="bg-white rounded-3xl border border-slate-100 shadow-lg hover:shadow-xl transition overflow-hidden">
                 <div className="px-6 py-5 flex flex-col gap-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1039,7 +1039,7 @@ const ProfilePage = () => {
         </div>
         <button
           onClick={openNewCertificationModal}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1264,7 +1264,7 @@ const ProfilePage = () => {
         </div>
         <button
           onClick={openNewExperienceModal}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-slate-900 via-indigo-700 to-purple-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

@@ -363,17 +363,17 @@ const StatCard = ({ icon, label, value, accent }) => (
 const formatLabel = (value) =>
   value
     ? value
-        .toString()
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase())
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
     : "—";
 
 const capitalizeWords = (value) =>
   value
     ? value
-        .toString()
-        .toLowerCase()
-        .replace(/\b\w/g, (c) => c.toUpperCase())
+      .toString()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase())
     : "—";
 
 export default function AdminDashboard() {
@@ -465,18 +465,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-4 sm:mb-0">
-          Admin Dashboard
-        </h1>
-        <Link
-          to="/admin/jobs/new"
-          className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-md transition-all"
-        >
-          + New Job
-        </Link>
-      </div>
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -529,7 +517,7 @@ export default function AdminDashboard() {
               <option value="">Assigned To</option>
               {assignedToOptions.map((name) => (
                 <option key={name} value={name}>
-                  {name}
+                  {capitalizeWords(name)}
                 </option>
               ))}
             </select>
@@ -559,6 +547,15 @@ export default function AdminDashboard() {
                 Clear Filters
               </button>
             )}
+            <Link
+              to="/admin/jobs/new"
+              className="inline-flex items-center px-4 py-2 text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow hover:shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+              style={{ minWidth: "110px", justifyContent: "center" }}
+              role="button"
+              tabIndex={0}
+            >
+              + New Job
+            </Link>
           </div>
         </div>
 
@@ -603,18 +600,17 @@ export default function AdminDashboard() {
                       <td className="p-3 text-gray-600">
                         {capitalizeWords(job.assignedTo?.name)}
                       </td>
-                      <td className="p-3 text-gray-600">
+                      <td className="p-3 text-gray-600 text-center">
                         {job.applicants?.length || 0}
                       </td>
                       <td className="p-3 capitalize font-semibold">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            job.status === "open"
+                          className={`px-2 py-1 rounded-full text-xs ${job.status === "open"
                               ? "bg-green-100 text-green-700"
                               : job.status === "closed"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
                         >
                           {formatLabel(job.status)}
                         </span>
@@ -669,11 +665,10 @@ export default function AdminDashboard() {
                     setCurrentPage((prev) => Math.max(1, prev - 1))
                   }
                   disabled={currentPage === 1}
-                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    currentPage === 1
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${currentPage === 1
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>Prev</span>
@@ -690,11 +685,10 @@ export default function AdminDashboard() {
                     )
                   }
                   disabled={currentPage === totalPages || !filteredJobs.length}
-                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    currentPage === totalPages || !filteredJobs.length
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${currentPage === totalPages || !filteredJobs.length
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   <span>Next</span>
                   <ChevronRight className="w-4 h-4" />
