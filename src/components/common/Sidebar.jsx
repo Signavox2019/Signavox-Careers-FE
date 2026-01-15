@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Briefcase, User, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Home, Briefcase, User, Menu, X, LayoutDashboard, Users } from 'lucide-react';
 import logo from '../../assets/snignavox_icon.png';
 import { useState } from 'react';
 import { useNavigation } from '../../contexts/NavigationContext';
@@ -12,7 +12,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
   const { isAuthenticated, user } = useAuth();
 
   const isActive = (path) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    // Exact match
+    if (location.pathname === path) {
+      return true;
+    }
+    
+    // For /admin, don't match /admin/recruiter paths
+    if (path === '/admin') {
+      return location.pathname.startsWith('/admin/') && !location.pathname.startsWith('/admin/recruiter');
+    }
+    
+    // For other paths, check if pathname starts with path + '/'
+    return location.pathname.startsWith(path + '/');
   };
 
   // Get navigation items based on user role
@@ -45,6 +56,11 @@ const Sidebar = ({ isOpen, onToggle }) => {
           name: 'Dashboard',
           href: '/admin',
           icon: LayoutDashboard,
+        },
+        {
+          name: 'Recruiters',
+          href: '/admin/recruiter',
+          icon: Users,
         },
         ...baseItems,
       ];

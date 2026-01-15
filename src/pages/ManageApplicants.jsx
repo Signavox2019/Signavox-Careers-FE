@@ -303,7 +303,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../assets/lib/api";
+import { api } from "../api";
 import { showError, showSuccess } from "../utils/notify";
 
 const STAGE_ORDER = [

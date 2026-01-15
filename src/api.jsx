@@ -1,5 +1,128 @@
+import axios from 'axios';
+
 const baseUrl = 'http://localhost:5000/api';  
 // const baseUrl = 'https://signavox-careers.onrender.com/api';  
+
+// Shared Axios instance with auth + error handling
+const axiosInstance = axios.create({
+  baseURL: baseUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Attach token on every request (supports both "authToken" and "token")
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Basic 401 handling (logout-like behaviour)
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('Session expired. Please login again.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Combined Axios-based API (from old src/assets/lib/api.js)
+export const api = {
+  /** -------------------------------
+   * JOB ROUTES
+   * ------------------------------- */
+  // fetchJobs: (params) => axiosInstance.get("/jobs", { params }),
+  fetchJobs: () => axiosInstance.get('/jobs'),
+  fetchJob: (id) => axiosInstance.get(`/jobs/${id}`),
+  createJob: (formData, config) =>
+    axiosInstance.post('/jobs', formData, config),
+  updateJob: (id, formData, config) =>
+    axiosInstance.put(`/jobs/${id}`, formData, config),
+  deleteJob: (id) => axiosInstance.delete(`/jobs/${id}`),
+  closeJob: (id) => axiosInstance.put(`/jobs/${id}/close`),
+  openJob: (id) => axiosInstance.put(`/jobs/${id}/reopen`),
+  getJobStats: () => axiosInstance.get('/jobs/stats/summary'),
+  fetchManagers: () =>
+    axiosInstance.get('/users', { params: { role: 'manager' } }),
+  fetchRecruiterDashboard: () =>
+    axiosInstance.get('/users/recruiter/my-stats'),
+
+  /** -------------------------------
+   * APPLICATION ROUTES
+   * ------------------------------- */
+  applyJob: (jobId, formData) =>
+    axiosInstance.post(`/applications/${jobId}/apply`, formData),
+  fetchApplicantsByJob: (jobId) =>
+    axiosInstance.get(`/applications/job/${jobId}`),
+  shortlistApplicant: (appId) =>
+    axiosInstance.put(`/applications/${appId}/shortlist`),
+  rejectApplicant: (appId) =>
+    axiosInstance.put(`/applications/${appId}/reject`),
+  generateOfferLetter: (appId) =>
+    axiosInstance.post(`/applications/${appId}/generate-offer-letter`),
+  getOfferLetter: (appId) =>
+    axiosInstance.get(`/applications/${appId}/offer-letter`),
+  acceptOffer: (appId) =>
+    axiosInstance.put(`/applications/${appId}/accept-offer`),
+  rejectOffer: (appId) =>
+    axiosInstance.put(`/applications/${appId}/reject-offer`),
+  fetchUserApplications: () => axiosInstance.get('/applications/my'),
+  fetchApplicantDetails: (userId) => axiosInstance.get(`/users/${userId}`),
+
+  /** -------------------------------
+   * RECRUITER ROUTES
+   * ------------------------------- */
+  fetchAllRecruiters: () => axiosInstance.get('/users/recruiter'),
+  fetchRecruiterById: (id) => axiosInstance.get(`/users/recruiter/${id}`),
+
+  /** -------------------------------
+   * GENERIC HELPERS
+   * ------------------------------- */
+  get: (url, params) => axiosInstance.get(url, { params }),
+  post: (url, data, config) => axiosInstance.post(url, data, config),
+  put: (url, data, config) => axiosInstance.put(url, data, config),
+  delete: (url) => axiosInstance.delete(url),
+};
+
+// Extra analytics/helpers previously in src/pages/api.jsx
+export const getApplicationStats = async () => {
+  const res = await axiosInstance.get('/jobs/stats/summary');
+  return res.data;
+};
+
+export const getJobApplicationStats = async () => {
+  const res = await axiosInstance.get('/applications/stats/overview');
+  return res.data;
+};
+
+export const getRecruiters = async () => {
+  const res = await axiosInstance.get('/users/stats');
+  return res.data;
+};
+
+export const getJobData = async () => {
+  // Wrapper around api.fetchJobs for backward compatibility
+  const res = await api.fetchJobs();
+  return res.data;
+};
+
+export const createJobJson = async (jobData) => {
+  // JSON-based job create (old pages/api.jsx behaviour)
+  const res = await axiosInstance.post('/jobs', jobData);
+  return res.data;
+};
+
+export const updateJobJson = async (id, jobData) => {
+  const res = await axiosInstance.put(`/jobs/${id}`, jobData);
+  return res.data;
+};
 
 // API endpoints
 export const API_ENDPOINTS = {

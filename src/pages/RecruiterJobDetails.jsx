@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../assets/lib/api';
+import { api } from '../api';
 
 /* ---------- Helpers (same as Admin) ---------- */
 const formatLabel = (value) =>

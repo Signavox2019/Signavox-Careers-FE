@@ -114,7 +114,7 @@
 // src/pages/JobDetails.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../assets/lib/api';
+import { api } from '../api';
 import { showError, showSuccess, showConfirm } from '../utils/notify';
 
 const formatLabel = (value) =>

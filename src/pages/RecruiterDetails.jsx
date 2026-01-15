@@ -2,26 +2,49 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Linkedin, Github, Twitter, Globe } from "lucide-react";
-import api from "../assets/lib/api";
+import { api } from "../api";
 
 const RecruiterDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadDetails = async () => {
       try {
-        const res = await api.getRecruiterById(id);
+        setLoading(true);
+        const res = await api.fetchRecruiterById(id);
         setData(res.data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     loadDetails();
   }, [id]);
 
-  if (!data) return <div className="p-6">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative w-12 h-12">
+            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin" />
+          </div>
+          <p className="text-sm font-medium text-gray-600">Loading recruiter details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <p className="text-sm font-medium text-gray-600">Recruiter not found.</p>
+      </div>
+    );
+  }
 
   const r = data.recruiter;
 
@@ -73,12 +96,12 @@ const RecruiterDetails = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen bg-gradient-to-b from-gray-50 to-white">
 
       {/* BACK BUTTON */}
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 px-4 py-1 border rounded text-sm"
+        className="mb-4 px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
       >
         Back
       </button>
@@ -87,7 +110,7 @@ const RecruiterDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* PROFILE CARD */}
-        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center">
           <div className="w-28 h-28 mx-auto rounded-full border flex items-center justify-center text-3xl font-semibold text-gray-700">
             {toTitleCase(r.name)?.[0]}
           </div>
@@ -171,7 +194,7 @@ const RecruiterDetails = () => {
         </div>
 
         {/* PERSONAL INFORMATION */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-100 p-6">
           <h3 className="text-sm font-bold text-gray-700 mb-4">
             Personal Information
           </h3>
@@ -218,7 +241,7 @@ const RecruiterDetails = () => {
 
       {/* ================= EDUCATION ================= */}
       {r.education?.length > 0 && (
-        <div className="bg-white rounded-xl shadow p-4 mt-6">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 mt-6">
           <h3 className="font-semibold text-sm mb-3">Education</h3>
 
           <table className="w-full table-fixed border-collapse">
@@ -246,7 +269,7 @@ const RecruiterDetails = () => {
 
       {/* ================= EXPERIENCE ================= */}
       {r.experienced && r.experiences?.length > 0 && (
-        <div className="bg-white rounded-xl shadow p-6 mt-6">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mt-6">
           <h3 className="font-semibold mb-4">Experience</h3>
 
           {r.experiences.map((exp) => (
@@ -268,7 +291,7 @@ const RecruiterDetails = () => {
 
       {/* ================= SKILLS ================= */}
       {r.skills?.length > 0 && (
-        <div className="bg-white rounded-xl shadow p-6 mt-6">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mt-6">
           <h3 className="font-semibold mb-3">Skills</h3>
           <div className="flex flex-wrap gap-2">
             {r.skills.map((skill, index) => (

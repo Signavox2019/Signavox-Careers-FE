@@ -26,7 +26,9 @@ const Layout = ({ children }) => {
     if (path === '/home') return 'Home';
     if (path === '/jobs') return 'Jobs';
     if (path === '/profile') return 'Profile';
-    if (path === '/admin' || path.startsWith('/admin/')) return 'Admin Dashboard';
+    if (path === '/admin') return 'Admin Dashboard';
+    if (path === '/admin/recruiter' || path.startsWith('/admin/recruiter/')) return 'Recruiters';
+    if (path.startsWith('/admin/')) return 'Admin Dashboard';
     if (path === '/recruiter' || path.startsWith('/recruiter/')) return 'Recruiter Dashboard';
     
     return 'CareerHub';

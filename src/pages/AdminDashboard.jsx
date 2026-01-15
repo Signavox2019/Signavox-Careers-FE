@@ -334,7 +334,7 @@
 
 
 import { useEffect, useState } from "react";
-import api from "../assets/lib/api";
+import { api } from "../api";
 import {
   Award,
   Users,

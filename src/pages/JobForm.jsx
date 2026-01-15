@@ -138,7 +138,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { Trash2, Plus, File, Calendar, Users, X } from "lucide-react";
-import api from "../assets/lib/api";
+import { api } from "../api";
 import { showError, showSuccess } from "../utils/notify";
 
 const HIRING_STAGE_OPTIONS = [

@@ -1,6 +1,6 @@
 // src/components/AssignJob.jsx
 import { useEffect, useState } from 'react';
-import api from '../assets/lib/api';
+import { api } from '../api';
 import { showSuccess, showError } from '../utils/notify';
 
 export default function AssignJob({ jobId, currentAssignee, onAssigned }) {
